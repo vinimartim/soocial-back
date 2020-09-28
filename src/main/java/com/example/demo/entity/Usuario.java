@@ -103,7 +103,7 @@ public class Usuario implements Serializable, UserDetails {
     private Session session;
 
     @OneToMany(mappedBy = "dono")
-    private Grupo grupo;
+    private List<Grupo> grupo;
 
     @JsonIgnore
     @Override
