@@ -8,21 +8,16 @@ import com.example.demo.entity.Usuario;
 import com.example.demo.exception.RegradeNegocioException;
 import com.example.demo.services.EnvioService;
 import com.example.demo.services.MensagemService;
-
 import com.example.demo.services.UsuarioService;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import static org.springframework.http.HttpStatus.*;
-
-import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @CrossOrigin(origins = "*")
