@@ -1,28 +1,31 @@
-package com.example.demo.controllers;
+package com.example.demo.resources;
 
 import com.example.demo.dto.MensagemDTO;
+import com.example.demo.dto.assember.MensagemAssember;
 import com.example.demo.entity.Envio;
 import com.example.demo.entity.Mensagem;
 import com.example.demo.entity.Usuario;
+import com.example.demo.exception.RegradeNegocioException;
 import com.example.demo.services.EnvioService;
 import com.example.demo.services.MensagemService;
 
 import com.example.demo.services.UsuarioService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import static org.springframework.http.HttpStatus.*;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "*")
 @RequestMapping("/api/mensagem")
 public class MensagemController {
 
@@ -37,10 +40,10 @@ public class MensagemController {
 
     @GetMapping("{id}")
     @ResponseStatus(OK)
-    public Mensagem get(Long id) {
-        return service
+    public Mensagem get(@PathVariable(value = "id") Long id) {
+         return service
             .findById(id)
-            .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Mensagem não encontrada"));
+            .orElseThrow(() -> new RegradeNegocioException("Mensagem não encontrada"));
     }
 
     @GetMapping
@@ -52,54 +55,60 @@ public class MensagemController {
     @PostMapping
     @ResponseStatus(CREATED)
     public ResponseEntity<Mensagem> add(@RequestBody MensagemDTO mensagemDTO) {
-        Usuario remetente = mensagemDTO.getRemetente();
-        Usuario destinatario = mensagemDTO.getDestinatario();
-        Envio envio = new Envio();
+        Mensagem mensagem = MensagemAssember.dtoToEntityModel(mensagemDTO);
 
-        Mensagem mensagem = new Mensagem();
-        mensagem.setAnexo(mensagemDTO.getAnexo());
-        mensagem.setAssunto(mensagemDTO.getAssunto());
-        mensagem.setConteudo(mensagemDTO.getConteudo());
-        mensagem.setEdicao(mensagemDTO.isEdicao());
-        mensagem.setSpam(mensagemDTO.isSpam());
-        mensagem.setVisualizada(mensagemDTO.isVisualizada());
-
-        envio.setRemetente(remetente);
-        envio.setDestinatario(destinatario);
+        Envio envio = envioService.setarEnvio(mensagemDTO);
         envio.setMensagem(mensagem);
 
-        if(envioService.save(envio) != null && service.save(mensagem) != null) {
+        if(service.save(mensagem) != null && envioService.save(envio) != null) {
             return new ResponseEntity<>(mensagem, CREATED);
         }
 
         return ResponseEntity.badRequest().build();
     }
 
-
     @PutMapping("{id}")
     @ResponseStatus(NO_CONTENT)
-    public Mensagem update(@PathVariable(value = "id") Long id, @RequestBody Mensagem mensagem) {
-        return service
-            .findById(id)
-            .map(mensagemExistente -> {
-                mensagem.setId(mensagemExistente.getId());
-                service.save(mensagem);
-                return mensagemExistente;
-            })
-            .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Mensagem não encontrada"));
+    public ResponseEntity<Mensagem> update(@PathVariable(value = "id") Long id, @RequestBody MensagemDTO mensagemDTO) {
+        Mensagem mensagem = MensagemAssember.dtoToEntityModel(mensagemDTO);
+
+        if(!service.existsById(id)) return ResponseEntity.notFound().build();
+
+        mensagem.setId(id);
+        service.save(mensagem);
+
+        return new ResponseEntity<>(mensagem, NO_CONTENT);
     }
 
     @DeleteMapping("{id}")
     @ResponseStatus(NO_CONTENT)
-    public void delete(Long id) {
-        service
-            .findById(id)
-            .map(mensagem -> {
-                service.delete(mensagem);
-                return mensagem;
-            })
-            .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Mensagem não encontrada"));
+    public void delete(@PathVariable(value = "id") Long id) {
+        Mensagem mensagem = service
+                .findById(id)
+                .orElseThrow(() -> new RegradeNegocioException("Mensagem não encontrada"));
+
+        Envio envio = envioService
+                .findByMensagem(mensagem)
+                .orElseThrow(() -> new RegradeNegocioException("Dados da mensagem não encontrados"));
+
+        envioService.delete(envio);
+        service.delete(mensagem);
     }
 
+    @GetMapping("/usuario/{id}")
+    @ResponseStatus(OK)
+    public ResponseEntity<List<Mensagem>> getAllByUsuarioId(@PathVariable(value = "id") Long id) {
+        Usuario usuario = usuarioService
+                .findById(id)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Usuário não encontrado"));
 
+        List<Envio> listaEnvio = envioService.findAllByDestinatario(usuario);
+        ArrayList<Mensagem> listaMensagem = new ArrayList<>();
+
+        for(Envio e : listaEnvio) {
+            listaMensagem.add(e.getMensagem());
+        }
+
+        return ResponseEntity.ok(listaMensagem);
+    }
 }

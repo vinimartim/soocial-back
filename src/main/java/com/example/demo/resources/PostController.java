@@ -1,11 +1,14 @@
-package com.example.demo.controllers;
+package com.example.demo.resources;
 
+import com.example.demo.dto.PostDTO;
+import com.example.demo.dto.assember.PostAssember;
 import com.example.demo.entity.Post;
 import com.example.demo.entity.Usuario;
 import com.example.demo.services.PostService;
 
 import com.example.demo.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import static org.springframework.http.HttpStatus.*;
@@ -14,7 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "*")
 @RequestMapping("/api/post")
 public class PostController {
 
@@ -40,8 +43,15 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public Post add(@RequestBody Post post) throws Exception {
-        return service.save(post);
+    public ResponseEntity<Post> add(@RequestBody PostDTO postDTO) throws Exception {
+
+        Post post = PostAssember.dtoToEntityModel(postDTO);
+
+        if(service.save(post) != null) {
+            return new ResponseEntity<>(post, CREATED);
+        }
+
+        return ResponseEntity.badRequest().build();
     }
 
     @PutMapping("{id}")

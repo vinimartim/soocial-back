@@ -1,8 +1,9 @@
-package com.example.demo.controllers;
+package com.example.demo.resources;
 
-import com.example.demo.entity.Post;
+import com.example.demo.dto.UsuarioDTO;
+import com.example.demo.dto.assember.UsuarioAssember;
 import com.example.demo.entity.Usuario;
-import com.example.demo.repository.UsuarioRepository;
+import com.example.demo.exception.RegradeNegocioException;
 import com.example.demo.services.UsuarioService;
 
 import org.apache.coyote.Response;
@@ -13,23 +14,31 @@ import org.springframework.web.server.ResponseStatusException;
 
 import static org.springframework.http.HttpStatus.*;
 
+import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "*")
 @RequestMapping("/api/usuario")
 public class UsuarioController {
 
     @Autowired
     private UsuarioService service;
-    
+
     @GetMapping("{id}")
     @ResponseStatus(OK)
     public Usuario get(@PathVariable(value = "id") Long id) {
         return service
             .findById(id)
             .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Usuário não encontrado"));
+    }
+
+    @GetMapping("/username/{username}")
+    @ResponseStatus(OK)
+    public Usuario getByUsername(@PathVariable(value = "username") String username) {
+        return service
+                .findByUsername(username)
+                .orElseThrow(() -> new RegradeNegocioException("Usuário não encontrado"));
     }
 
     @GetMapping("/hello")
@@ -45,8 +54,14 @@ public class UsuarioController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public Usuario add(@RequestBody Usuario usuario) {
-        return service.save(usuario);
+    public ResponseEntity<Usuario> add(@RequestBody UsuarioDTO usuarioDTO) {
+        Usuario usuario = UsuarioAssember.dtoToEntityModel(usuarioDTO);
+
+        if (service.save(usuario) != null) {
+            return new ResponseEntity<>(usuario, CREATED);
+        }
+
+        return ResponseEntity.badRequest().build();
     }
 
     @PutMapping("{id}")
