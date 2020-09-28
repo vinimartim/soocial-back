@@ -1,115 +1,143 @@
 package com.example.demo.entity;
 
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-public class Usuario {
-    
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(
+        name = "usuario",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "unique_username_email",
+                        columnNames = {"username", "email"}
+                )
+        }
+)
+public class Usuario implements Serializable, UserDetails {
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column
     private Long id;
+
+    @Column
     private String nome;
+
+    @Column
     private String sobrenome;
+
+    @Column(name = "username", unique = true)
     private String username;
+
+    @JsonIgnore
+    @Column
     private String senha;
+
+    @Column(name = "email", unique = true)
     private String email;
+
+    @Column
     private String dataNascimento;
-    private LocalDateTime ultimoLogin;
-    private LocalDateTime ultimoLogout;
-    private boolean statusCadastro;
+
+    @Column
+    private LocalDateTime loginAt;
+
+    @Column
+    private LocalDateTime logoutAt;
+
+    @Column
+    private Boolean statusCadastro;
+
+    @Column
     private String genero;
+
+    @Column
     private String telefone;
 
-    public Long getId() {
-        return this.id;
+    @JsonIgnore
+    @OneToMany(
+            cascade = CascadeType.ALL,
+            mappedBy = "usuario"
+    )
+    private List<Colecao> colecao;
+
+    @JsonIgnore
+    @OneToOne(
+            cascade = CascadeType.ALL,
+            mappedBy = "usuario"
+    )
+    private Comentario comentario;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "usuario")
+    private List<Post> post;
+
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @Column(columnDefinition = "VARCHAR(10) default ROLE_USER", insertable = false, updatable = true)
+    @JoinTable(
+            name = "usuarios_roles",
+            joinColumns = @JoinColumn(name = "usuario_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "nome")
+    )
+    private List<Role> roles;
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "usuario")
+    private Session session;
+
+    @OneToMany(mappedBy = "dono")
+    private Grupo grupo;
+
+    @JsonIgnore
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    @JsonIgnore
+    @Override
+    public String getPassword() {
+        return null;
     }
 
-    public String getNome() {
-        return this.nome;
+    @JsonIgnore
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    @JsonIgnore
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
     }
 
-    public String getSobrenome() {
-        return this.sobrenome;
+    @JsonIgnore
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
     }
 
-    public void setSobrenome(String sobrenome) {
-        this.sobrenome = sobrenome;
-    }
-
-    public String getUsername() {
-        return this.username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getSenha() {
-        return this.senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
-    }
-
-    public String getEmail() {
-        return this.email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getDataNascimento() {
-        return this.dataNascimento;
-    }
-
-    public void setDataNascimento(String dataNascimento) {
-        this.dataNascimento = dataNascimento;
-    }
-
-    public LocalDateTime getUltimoLogin() {
-        return this.ultimoLogin;
-    }
-
-    public void setUltimoLogin(LocalDateTime ultimoLogin) {
-        this.ultimoLogin = ultimoLogin;
-    }
-
-    public LocalDateTime getUltimoLogout() {
-        return this.ultimoLogout;
-    }
-
-    public void setUltimoLogout(LocalDateTime ultimoLogout) {
-        this.ultimoLogout = ultimoLogout;
-    }
-
-    public boolean isStatusCadastro() {
-        return this.statusCadastro;
-    }
-
-    public void setStatusCadastro(boolean statusCadastro) {
-        this.statusCadastro = statusCadastro;
-    }
-
-    public String getGenero() {
-        return this.genero;
-    }
-
-    public void setGenero(String genero) {
-        this.genero = genero;
-    }
-
-    public String getTelefone() {
-        return this.telefone;
-    }
-
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
+    @JsonIgnore
+    @Override
+    public boolean isEnabled() {
+        return false;
     }
 }

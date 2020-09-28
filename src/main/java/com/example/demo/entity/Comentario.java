@@ -6,40 +6,43 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
+import java.io.Serializable;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Post {
+@Table(name = "comentario")
+public class Comentario implements Serializable {
 
     @Id
-    @Column
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column
     private Long id;
 
     @Column
     private String conteudo;
 
-    @Column(columnDefinition = "TINYINT default 0", insertable = false, updatable = true)
+    @Column
     private boolean edicao;
 
-    @Column(columnDefinition = "TINYINT default 0", insertable = false, updatable = true)
+    @Column
     private boolean spam;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "anexo_id")
     private Anexo anexo;
 
-    @JsonIgnore
-    @OneToMany(
-            cascade = CascadeType.ALL,
-            mappedBy = "post"
-    )
-    private List<Comentario> comentario;
-
-    @ManyToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private Post post;
+
+//    @JsonIgnore
+//    @OneToOne(mappedBy = "comentario")
+//    private Metrica metrica;
+
 }

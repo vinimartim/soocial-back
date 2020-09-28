@@ -1,53 +1,37 @@
 package com.example.demo.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
 import java.util.List;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "grupo")
 public class Grupo {
-    
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column
     private Long id;
+
+    @Column
     private String nome;
+
+    @Column
     private String descricao;
-    private List<Usuario> administradores;
+
+    @Column
     private String privacidade;
 
-    public Long getId() {
-        return this.id;
-    }
+    @ManyToOne
+    @JoinColumn(name = "dono")
+    private Usuario dono;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return this.nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getDescricao() {
-        return this.descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public List<Usuario> getAdministradores() {
-        return this.administradores;
-    }
-
-    public void setAdministradores(List<Usuario> administradores) {
-        this.administradores = administradores;
-    }
-
-    public String getPrivacidade() {
-        return this.privacidade;
-    }
-
-    public void setPrivacidade(String privacidade) {
-        this.privacidade = privacidade;
-    }
-
+    @OneToMany
+    private List<Usuario> administradores;
 }

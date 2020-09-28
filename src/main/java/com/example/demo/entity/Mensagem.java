@@ -1,51 +1,47 @@
 package com.example.demo.entity;
 
-public class Mensagem {
-    
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "mensagem")
+public class Mensagem implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column
     private Long id;
+
+    @NotBlank
+    @Size(max = 200)
+    @Column(name = "assunto")
     private String assunto;
+
+    @NotBlank
+    @Size(max = 1000)
+    @Column(name = "conteudo")
     private String conteudo;
+
+    @Column(name = "visualizada")
     private boolean visualizada;
+
+    @Column(name = "spam")
     private boolean spam;
 
-    public Long getId() {
-        return this.id;
-    }
+    @Column(name = "edicao")
+    private boolean edicao;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getAssunto() {
-        return this.assunto;
-    }
-
-    public void setAssunto(String assunto) {
-        this.assunto = assunto;
-    }
-
-    public String getConteudo() {
-        return this.conteudo;
-    }
-
-    public void setConteudo(String conteudo) {
-        this.conteudo = conteudo;
-    }
-
-    public boolean isVisualizada() {
-        return this.visualizada;
-    }
-
-    public void setVisualizada(boolean visualizada) {
-        this.visualizada = visualizada;
-    }
-
-    public boolean isSpam() {
-        return this.spam;
-    }
-
-    public void setSpam(boolean spam) {
-        this.spam = spam;
-    }
-
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "anexo_id")
+    private Anexo anexo;
 }
