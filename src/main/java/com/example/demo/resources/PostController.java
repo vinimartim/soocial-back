@@ -1,27 +1,28 @@
 package com.example.demo.controllers;
 
 import com.example.demo.entity.Post;
+import com.example.demo.entity.Usuario;
 import com.example.demo.services.PostService;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.services.UsuarioService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import static org.springframework.http.HttpStatus.*;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/post")
 public class PostController {
-    
+
+    @Autowired
     private PostService service;
+
+    @Autowired
+    private UsuarioService usuarioService;
 
     @GetMapping("{id}")
     @ResponseStatus(OK)
@@ -34,12 +35,12 @@ public class PostController {
     @GetMapping
     @ResponseStatus(OK)
     public List<Post> getAll() {
-        return service.findAll();
+        return service.findAll().stream().sorted().collect(Collectors.toList());
     }
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public Post add(@RequestBody Post post) {
+    public Post add(@RequestBody Post post) throws Exception {
         return service.save(post);
     }
 
@@ -50,7 +51,11 @@ public class PostController {
             .findById(id)
             .map(postExistente -> {
                 post.setId(postExistente.getId());
-                service.save(post);
+                try {
+                    service.save(post);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return postExistente;
             })
             .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Post não encontrado"));
@@ -66,5 +71,16 @@ public class PostController {
                 return post;
             })
             .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Post não encontrado"));
+    }
+
+    @GetMapping("usuario/{id}")
+    public List<Post> getAllByUsuario(@PathVariable(value = "id") Long id) {
+        Usuario usuario = usuarioService
+                .findById(id)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Post não encontrado"));
+
+        List<Post> postArrayList = service.findByUsuario(usuario);
+        Collections.reverse(postArrayList);
+        return postArrayList;
     }
 }

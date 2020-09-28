@@ -3,6 +3,7 @@ package com.example.demo.controllers;
 import com.example.demo.entity.Colecao;
 import com.example.demo.services.ColecaoService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +22,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/colecao")
 public class ColecaoController {
-    
+
+    @Autowired
     private ColecaoService service;
 
     @GetMapping("{id}")
