@@ -4,6 +4,7 @@ import com.example.demo.entity.Usuario;
 import com.example.demo.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -19,9 +20,7 @@ public class UsuarioService {
         return repository.save(entity);
     }
     
-    public void delete(Usuario entity) {
-        repository.delete(entity);
-    }
+    public void delete(Usuario entity) { repository.delete(entity); }
 
     public Optional<Usuario> findById(Long id) {
         return repository.findById(id);
@@ -30,4 +29,8 @@ public class UsuarioService {
     public List<Usuario> findAll() {
         return repository.findAll();
     }
+
+    public Optional<Usuario> findByUsername(String username) { return repository.findByUsername(username); }
+
+    public List<Usuario> findSeguidoresById(Long id) { return repository.findSeguidoresById(id); }
 }

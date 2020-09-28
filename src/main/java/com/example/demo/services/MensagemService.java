@@ -4,10 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import com.example.demo.entity.Mensagem;
+import com.example.demo.entity.Usuario;
+import com.example.demo.exception.RegradeNegocioException;
 import com.example.demo.repository.MensagemRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class MensagemService {
@@ -32,4 +35,7 @@ public class MensagemService {
     public List<Mensagem> findAll() {
         return repository.findAll();
     }
+
+    public boolean existsById(Long id) { return repository.existsById(id); }
+
 }
