@@ -33,5 +33,18 @@ public class Grupo {
     private Usuario dono;
 
     @OneToMany
+    @JoinTable(
+            name = "grupo_admins",
+            joinColumns = @JoinColumn(name = "grupo_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "admin_id", referencedColumnName = "id")
+    )
     private List<Usuario> administradores;
+
+    @ManyToMany
+    @JoinTable(
+            name = "grupo_membros",
+            joinColumns = @JoinColumn(name = "grupo_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "membro_id", referencedColumnName = "id")
+    )
+    private List<Usuario> membros;
 }

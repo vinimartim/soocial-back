@@ -32,14 +32,12 @@ public class Post {
     @JoinColumn(name = "anexo_id")
     private Anexo anexo;
 
-    @JsonIgnore
-    @OneToMany(
-            cascade = CascadeType.ALL,
-            mappedBy = "post"
-    )
-    private List<Comentario> comentario;
-
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
+
+    // Se o grupo for 0, significa que o post é da timeline
+    @ManyToOne
+    @JoinColumn(name = "grupo")
+    private Grupo grupo;
 }
