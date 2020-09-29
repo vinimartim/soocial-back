@@ -1,6 +1,6 @@
 package com.example.demo.resources;
 
-import com.example.demo.payload.UploadAnexoResponse;
+import com.example.demo.entity.Anexo;
 import com.example.demo.services.AnexoStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +16,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
+import static org.springframework.http.HttpStatus.*;
+
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping("/api/anexo")
@@ -27,18 +29,25 @@ public class AnexoController {
     private AnexoStorageService anexoStorageService;
 
     @PostMapping
-    public UploadAnexoResponse uploadFile(@RequestParam("anexo") MultipartFile anexo) {
-        String nomeAnexo = anexoStorageService.storeAnexo(anexo);
+    public ResponseEntity<Anexo> uploadFile(@RequestParam("anexo") MultipartFile arquivo) {
+        String nomeAnexo = anexoStorageService.storeAnexo(arquivo);
+        Anexo anexo = anexoStorageService.setAnexo(arquivo);
 
         String anexoDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/donwload/")
+                .path("/api/anexo/download/")
                 .path(nomeAnexo)
                 .toUriString();
 
-        return new UploadAnexoResponse(nomeAnexo, anexoDownloadUri, anexo.getContentType(), anexo.getSize());
+        anexo.setPath(anexoDownloadUri);
+
+        if(anexoStorageService.save(anexo) != null) {
+            return new ResponseEntity<>(anexo, CREATED);
+        }
+
+        return ResponseEntity.badRequest().build();
     }
 
-    @GetMapping("{nomeAnexo}")
+    @GetMapping("download/{nomeAnexo}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String nomeAnexo, HttpServletRequest request) {
         // Load file as Resource
         Resource resource = anexoStorageService.loadAnexoAsResource(nomeAnexo);
@@ -48,7 +57,7 @@ public class AnexoController {
         try {
             contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
         } catch (IOException ex) {
-            logger.info("Could not determine file type.");
+            logger.info("Não foi possível determinar o tipo.");
         }
 
         // Fallback to the default content type if type could not be determined

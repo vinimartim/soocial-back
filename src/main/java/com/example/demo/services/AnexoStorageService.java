@@ -3,7 +3,9 @@ package com.example.demo.services;
 import com.example.demo.entity.Anexo;
 import com.example.demo.exception.AnexoNotFoundException;
 import com.example.demo.exception.AnexoStorageException;
+import com.example.demo.exception.RegradeNegocioException;
 import com.example.demo.property.AnexoStorageProperties;
+import com.example.demo.repository.AnexoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -25,6 +27,9 @@ public class AnexoStorageService {
     private final Path fileStorageLocation;
 
     @Autowired
+    private AnexoRepository repository;
+
+    @Autowired
     public AnexoStorageService(AnexoStorageProperties fileStorageProperties) {
         this.fileStorageLocation = Paths.get(fileStorageProperties.getUploadDir())
                 .toAbsolutePath().normalize();
@@ -32,7 +37,7 @@ public class AnexoStorageService {
         try {
             Files.createDirectories(this.fileStorageLocation);
         } catch (Exception ex) {
-            throw new AnexoStorageException("Could not create the directory where the uploaded files will be stored.", ex);
+            throw new AnexoStorageException("Não foi possível criar o diretório onde os anexos seriam guardados.", ex);
         }
     }
 
@@ -68,5 +73,28 @@ public class AnexoStorageService {
         } catch (MalformedURLException ex) {
             throw new AnexoNotFoundException("File not found " + nomeAnexo, ex);
         }
+    }
+
+    public Anexo save(Anexo entity) {
+        return repository.save(entity);
+    }
+
+    public Anexo setAnexo(MultipartFile arquivo) {
+        if(!arquivo.getContentType().contains("jpeg") &&
+                !arquivo.getContentType().contains("gif") &&
+                !arquivo.getContentType().contains("png")) {
+            throw new RegradeNegocioException("A extensão do anexo é inválida. Extensões permitidas: jpeg, jpg, gif, png");
+        }
+
+        if(arquivo.getSize() > 35000000) {
+            throw new RegradeNegocioException("O tamanho máximo de anexo permitido é de 35Mb");
+        }
+
+        Anexo anexo = new Anexo();
+        anexo.setNome(arquivo.getName());
+        anexo.setExtensao(arquivo.getContentType());
+        anexo.setTamanho(arquivo.getSize());
+
+        return anexo;
     }
 }

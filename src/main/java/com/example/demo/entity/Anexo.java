@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,15 +31,13 @@ public class Anexo implements Serializable {
     private String extensao;
 
     @Column
-    private double tamanho;
+    private long tamanho;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "anexo")
     private Mensagem mensagem;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "anexo")
     private Post post;
-
-    @OneToOne(mappedBy = "anexo")
-    private Comentario comentario;
-
 }
