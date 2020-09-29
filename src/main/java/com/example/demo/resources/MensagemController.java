@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class MensagemController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public ResponseEntity<Mensagem> add(@RequestBody MensagemDTO mensagemDTO) {
+    public ResponseEntity<Mensagem> add(@Valid @RequestBody MensagemDTO mensagemDTO) {
         Mensagem mensagem = MensagemAssember.dtoToEntityModel(mensagemDTO);
 
         Envio envio = envioService.setarEnvio(mensagemDTO);

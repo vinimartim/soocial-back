@@ -10,8 +10,7 @@ import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-    Optional<Usuario> findByUsername(String username);
-
+    Usuario findByUsername(String username);
     @Query(value =
             "SELECT * FROM usuario u WHERE u.id IN (SELECT * FROM seguidores s WHERE s.usuario_id = :usuario_id)",
             nativeQuery = true

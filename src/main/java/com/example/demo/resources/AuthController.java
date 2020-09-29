@@ -57,9 +57,14 @@ public class AuthController {
 
         final String mensagem = "Autorização efetuada com sucesso";
         final String jwt = jwtTokenUtil.generateToken(userDetails);
-        final Usuario usuario = usuarioService
-                .findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RegradeNegocioException("Usuário não encontrado"));
+
+
+        final Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
+
+        if(usuario == null) {
+            throw new RegradeNegocioException("Usuário não encontrado");
+        }
+
 
         Session session = new Session(jwt, usuario);
         sessionService.save(session);

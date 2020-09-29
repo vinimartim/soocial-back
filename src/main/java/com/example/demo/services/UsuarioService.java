@@ -1,6 +1,7 @@
 package com.example.demo.services;
 
 import com.example.demo.entity.Usuario;
+import com.example.demo.exception.RegradeNegocioException;
 import com.example.demo.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,17 @@ public class UsuarioService {
     public UsuarioService() {}
 
     public Usuario save(Usuario entity) {
+
+        Usuario usuarioExistente = repository.findByUsername(entity.getUsername());
+
+        if(usuarioExistente != null && !usuarioExistente.equals(entity)) {
+            throw new RegradeNegocioException("Já existe um usuário cadastrado com esse username");
+        }
+
+        return repository.save(entity);
+    }
+
+    public Usuario update(Usuario entity) {
         return repository.save(entity);
     }
     
@@ -30,7 +42,7 @@ public class UsuarioService {
         return repository.findAll();
     }
 
-    public Optional<Usuario> findByUsername(String username) { return repository.findByUsername(username); }
+    public Usuario findByUsername(String username) { return repository.findByUsername(username); }
 
     public List<Usuario> findSeguidoresById(Long id) { return repository.findSeguidoresById(id); }
 }

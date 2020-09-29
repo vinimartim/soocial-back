@@ -50,9 +50,11 @@ public class AuthService {
     public ResponseEntity<?> carregaToken(UserDetails userDetails) {
         this.mensagem = "Autorização efetuada com sucesso";
         this.jwt = jwtTokenUtil.generateToken(userDetails);
-        this.usuario = usuarioService
-                .findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RegradeNegocioException("Usuário não encontrado"));
+        this.usuario = usuarioService.findByUsername(userDetails.getUsername());
+
+        if(this.usuario == null) {
+            throw new RegradeNegocioException("Usuário não encontrado");
+        }
 
         return ResponseEntity.ok(new AuthResponse(mensagem, jwt, usuario));
     }

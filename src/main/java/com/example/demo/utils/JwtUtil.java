@@ -47,9 +47,11 @@ public class JwtUtil {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        Usuario usuario = usuarioService
-                .findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RegradeNegocioException("Usuário não encontrado"));
+        Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
+
+        if(usuario == null) {
+            throw new RegradeNegocioException("Usuário não encontrado");
+        }
 
         claims.put("username", usuario.getUsername());
         claims.put("email", usuario.getEmail());

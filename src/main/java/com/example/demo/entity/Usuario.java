@@ -8,12 +8,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -42,14 +43,14 @@ public class Usuario implements Serializable, UserDetails {
     @Column
     private String sobrenome;
 
-    @Column(name = "username", unique = true)
+    @Column(name = "username")
     private String username;
 
     @JsonIgnore
     @Column
     private String senha;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "email")
     private String email;
 
     @Column
@@ -76,13 +77,6 @@ public class Usuario implements Serializable, UserDetails {
             mappedBy = "usuario"
     )
     private List<Colecao> colecao;
-
-    @JsonIgnore
-    @OneToOne(
-            cascade = CascadeType.ALL,
-            mappedBy = "usuario"
-    )
-    private Comentario comentario;
 
     @JsonIgnore
     @OneToMany(mappedBy = "usuario")
@@ -140,4 +134,5 @@ public class Usuario implements Serializable, UserDetails {
     public boolean isEnabled() {
         return false;
     }
+
 }

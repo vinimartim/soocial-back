@@ -42,9 +42,12 @@ public class EnvioService {
     public Envio setarEnvio(MensagemDTO mensagemDTO) {
         Envio envio = new Envio();
         Usuario remetente = mensagemDTO.getRemetente();
-        Usuario destinatario = usuarioService
-                .findByUsername(mensagemDTO.getDestinatario().getUsername())
-                .orElseThrow(() -> new RegradeNegocioException("Destinatário inválido"));
+        Usuario destinatario = usuarioService.findByUsername(mensagemDTO.getDestinatario().getUsername());
+
+        if(destinatario == null) {
+            throw new RegradeNegocioException("Destinatário não encontrado");
+        }
+
         envio.setRemetente(remetente);
         envio.setDestinatario(destinatario);
 

@@ -9,8 +9,11 @@ import com.example.demo.services.UsuarioService;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import javax.validation.Valid;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -30,20 +33,19 @@ public class UsuarioController {
     public Usuario get(@PathVariable(value = "id") Long id) {
         return service
             .findById(id)
-            .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Usuário não encontrado"));
+            .orElseThrow(() -> new RegradeNegocioException("Usuário não encontrado"));
     }
 
-    @GetMapping("/username/{username}")
+    @GetMapping("username/{username}")
     @ResponseStatus(OK)
-    public Usuario getByUsername(@PathVariable(value = "username") String username) {
-        return service
-                .findByUsername(username)
-                .orElseThrow(() -> new RegradeNegocioException("Usuário não encontrado"));
-    }
+    public ResponseEntity<Usuario> getByUsername(@PathVariable(value = "username") String username) {
+        Usuario usuario = service.findByUsername(username);
 
-    @GetMapping("/hello")
-    public String hello() {
-        return "Hello World";
+        if(usuario != null) {
+            return ResponseEntity.ok(usuario);
+        }
+
+        throw new RegradeNegocioException("Usuário não encontrado");
     }
 
     @GetMapping
@@ -54,42 +56,44 @@ public class UsuarioController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public ResponseEntity<Usuario> add(@RequestBody UsuarioDTO usuarioDTO) {
+    public ResponseEntity<Usuario> add(@Valid @RequestBody UsuarioDTO usuarioDTO) {
         Usuario usuario = UsuarioAssember.dtoToEntityModel(usuarioDTO);
 
-        if (service.save(usuario) != null) {
+        if(service.save(usuario) != null) {
             return new ResponseEntity<>(usuario, CREATED);
         }
 
-        return ResponseEntity.badRequest().build();
+        throw new RegradeNegocioException("Não foi possível salvar o usuário");
     }
 
     @PutMapping("{id}")
     @ResponseStatus(NO_CONTENT)
-    public Usuario update(@PathVariable(value = "id") Long id, @RequestBody Usuario usuario) {
-        return service
-            .findById(id)
-            .map(usuarioExistente -> {
-                usuario.setId(usuarioExistente.getId());
-                service.save(usuario);
-                return usuarioExistente;
-            })
-            .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Usuário não encontrado"));
+    public ResponseEntity<Usuario> update(@PathVariable(value = "id") Long id, @Valid @RequestBody UsuarioDTO usuarioDTO) {
+        Usuario usuario = UsuarioAssember.dtoToEntityModel(usuarioDTO);
+        Usuario existente = service
+                .findById(id)
+                .orElseThrow(() -> new RegradeNegocioException("Usuário não encontrado"));
+
+        usuario.setId(existente.getId());
+
+        if(service.update(usuario) != null) {
+            return new ResponseEntity<>(usuario, NO_CONTENT);
+        }
+
+        throw new RegradeNegocioException("Não foi possível salvar o usuário");
     }
 
     @DeleteMapping("{id}")
     @ResponseStatus(NO_CONTENT )
     public void delete(@PathVariable(value = "id") Long id) {
-        service
-            .findById(id)
-            .map(usuario -> {
-                service.delete(usuario);
-                return usuario;
-            })
-            .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Usuário não encontrado"));
+        Usuario usuario = service
+                .findById(id)
+                .orElseThrow(() -> new RegradeNegocioException("Usuário não encontrado"));
+
+        service.delete(usuario);
     }
 
-    @GetMapping("/seguidores/{id}")
+    @GetMapping("seguidores/{id}")
     public ResponseEntity<List<Usuario>> getPosts(@PathVariable(value = "id") Long id) {
         List<Usuario> seguindo = service.findSeguidoresById(id);
 
@@ -98,11 +102,5 @@ public class UsuarioController {
         }
 
         return ResponseEntity.notFound().build();
-
     }
-
-//    @PostMapping("/salvar-seguidor")
-//    public Usuario salvarSeguindo(@RequestBody Usuario usuario) {
-//
-//    }
 }

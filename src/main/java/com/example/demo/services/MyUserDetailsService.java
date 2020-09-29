@@ -21,9 +21,11 @@ public class MyUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         BCryptPasswordEncoder encoder = passwordEncoder();
-        Usuario usuario = repository
-                .findByUsername(username)
-                .orElseThrow(() -> new RegradeNegocioException("Usuário não encontrado"));
+        Usuario usuario = repository.findByUsername(username);
+
+        if(usuario == null) {
+            throw new RegradeNegocioException("Usuário não encontrado");
+        }
 
         return new User(usuario.getUsername(), encoder.encode(usuario.getSenha()), true, true, true, true, usuario.getAuthorities());
     }
