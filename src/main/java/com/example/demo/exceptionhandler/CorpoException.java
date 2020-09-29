@@ -14,7 +14,7 @@ public class CorpoException {
     private Integer status;
     private LocalDateTime dataHora;
     private String mensagem;
-    private List<Campo> campo;
+    private List<Campo> campos;
 
     @Data
     @AllArgsConstructor

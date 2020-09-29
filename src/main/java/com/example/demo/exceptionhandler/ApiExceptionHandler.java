@@ -34,7 +34,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         corpoException.setDataHora(LocalDateTime.now());
 
         return handleExceptionInternal(ex,corpoException,new HttpHeaders(),status,request);
-
     }
 
     @Override
@@ -53,7 +52,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         corpoException.setStatus(status.value());
         corpoException.setMensagem("Um ou mais campos estão inválidos");
         corpoException.setDataHora(LocalDateTime.now());
-        corpoException.setCampo(campos);
+        corpoException.setCampos(campos);
 
         return super.handleExceptionInternal(ex, corpoException, headers, status, request);
     }
