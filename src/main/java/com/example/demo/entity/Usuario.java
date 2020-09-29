@@ -96,8 +96,9 @@ public class Usuario implements Serializable, UserDetails {
     @OneToOne(mappedBy = "usuario")
     private Session session;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "dono")
-    private List<Grupo> grupo;
+    private List<Grupo> grupos;
 
     @JsonIgnore
     @Override

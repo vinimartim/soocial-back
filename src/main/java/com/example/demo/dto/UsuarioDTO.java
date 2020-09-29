@@ -42,6 +42,8 @@ public class UsuarioDTO {
     @Size(max = 11)
     private String telefone;
 
+    private boolean statusCadastro;
+
     private List<Role> roles;
 
     public UsuarioDTO() {

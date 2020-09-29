@@ -19,6 +19,7 @@ public class UsuarioAssember {
         usuario.setTelefone(dto.getTelefone());
         usuario.setDataNascimento(dto.getDataNascimento());
         usuario.setRoles(dto.getRoles());
+        usuario.setStatusCadastro(dto.isStatusCadastro());
 
         return usuario;
     }
