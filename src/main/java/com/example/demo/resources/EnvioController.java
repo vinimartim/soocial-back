@@ -32,10 +32,8 @@ public class EnvioController {
     @GetMapping("mensagens/destinatario/{idUsuario}")
     @ResponseStatus(OK)
     public ResponseEntity<List<Envio>> getAllByDestinatario(@PathVariable(value = "idUsuario") Long idUsuario) {
-        Usuario destinatario = usuarioService
-                .findById(idUsuario)
-                .orElseThrow(() -> new RegradeNegocioException("Usuário não encontrado"));
 
+        Usuario destinatario = usuarioService.findById(idUsuario);
         List<Envio> listaEnvio = service.findAllByDestinatario(destinatario);
         return ResponseEntity.ok(listaEnvio);
     }
@@ -58,10 +56,7 @@ public class EnvioController {
     @ResponseStatus(OK)
     public ResponseEntity<List<Envio>> getAllByRemetente(@PathVariable(value = "idUsuario") Long idUsuario) {
 
-        Usuario remetente = usuarioService
-                .findById(idUsuario)
-                .orElseThrow(() -> new RegradeNegocioException("Usuário não encontrado"));
-
+        Usuario remetente = usuarioService.findById(idUsuario);
         List<Envio> listaEnvio = service.findAllByRemetente(remetente);
         return ResponseEntity.ok(listaEnvio);
     }

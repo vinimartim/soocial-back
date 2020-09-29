@@ -85,9 +85,7 @@ public class PostController {
 
     @GetMapping("usuario/{id}")
     public List<Post> getAllByUsuario(@PathVariable(value = "id") Long id) {
-        Usuario usuario = usuarioService
-                .findById(id)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Post não encontrado"));
+        Usuario usuario = usuarioService.findById(id);
 
         List<Post> postArrayList = service.findByUsuario(usuario);
         Collections.reverse(postArrayList);

@@ -94,9 +94,7 @@ public class MensagemController {
     @GetMapping("/usuario/{id}")
     @ResponseStatus(OK)
     public ResponseEntity<List<Mensagem>> getAllByUsuarioId(@PathVariable(value = "id") Long id) {
-        Usuario usuario = usuarioService
-                .findById(id)
-                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Usuário não encontrado"));
+        Usuario usuario = usuarioService.findById(id);
 
         List<Envio> listaEnvio = envioService.findAllByDestinatario(usuario);
         ArrayList<Mensagem> listaMensagem = new ArrayList<>();
