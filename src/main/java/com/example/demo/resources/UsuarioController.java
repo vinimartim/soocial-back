@@ -3,7 +3,7 @@ package com.example.demo.resources;
 import com.example.demo.dto.UsuarioDTO;
 import com.example.demo.dto.assember.UsuarioAssember;
 import com.example.demo.entity.Usuario;
-import com.example.demo.services.UsuarioService;
+import com.example.demo.services.impl.UsuarioServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -20,44 +19,43 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 public class UsuarioController {
 
     @Autowired
-    private UsuarioService service;
+    private UsuarioServiceImpl usuarioServiceImpl;
 
     @GetMapping("{id}")
     public ResponseEntity<Usuario> getById(@PathVariable(value = "id") Long id) {
-        return ResponseEntity.ok(service.findById(id));
+        return ResponseEntity.ok(usuarioServiceImpl.findById(id));
     }
 
     @GetMapping("username/{username}")
     public ResponseEntity<Usuario> getByUsername(@PathVariable(value = "username") String username) {
-        return ResponseEntity.ok(service.findByUsername(username));
+        return ResponseEntity.ok(usuarioServiceImpl.findByUsername(username));
     }
 
     @GetMapping
     public ResponseEntity<List<Usuario>> getAll() {
-        return ResponseEntity.ok(service.findAll());
+        return ResponseEntity.ok(usuarioServiceImpl.findAll());
     }
 
     @PostMapping
     public ResponseEntity<Usuario> add(@Valid @RequestBody UsuarioDTO usuarioDTO) {
-
         Usuario usuario = UsuarioAssember.dtoToEntityModel(usuarioDTO);
-        return new ResponseEntity<>(service.save(usuario), CREATED);
+        return new ResponseEntity<>(usuarioServiceImpl.save(usuario), CREATED);
     }
 
     @PutMapping("{id}")
     public ResponseEntity<Usuario> update(@PathVariable(value = "id") Long id, @Valid @RequestBody UsuarioDTO usuarioDTO) {
-
         Usuario usuario = UsuarioAssember.dtoToEntityModel(usuarioDTO);
-        Usuario existente = service.findById(id);
-        usuario.setId(existente.getId());
-        return new ResponseEntity<>(service.update(usuario), NO_CONTENT);
+
+        if(!usuarioServiceImpl.existsById(id)) return ResponseEntity.notFound().build();
+        usuario.setId(id);
+
+        return new ResponseEntity<>(usuarioServiceImpl.update(usuario), NO_CONTENT);
     }
 
     @DeleteMapping("{id}")
     public void delete(@PathVariable(value = "id") Long id) {
-
-        Usuario usuario = service.findById(id);
-        service.delete(usuario);
+        Usuario usuario = usuarioServiceImpl.findById(id);
+        usuarioServiceImpl.delete(usuario);
     }
 
 //    @GetMapping("seguidores/{id}")

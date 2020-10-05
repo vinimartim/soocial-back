@@ -2,7 +2,7 @@ package com.example.demo.utils;
 
 import com.example.demo.entity.Usuario;
 import com.example.demo.exception.RegradeNegocioException;
-import com.example.demo.services.UsuarioService;
+import com.example.demo.services.impl.UsuarioServiceImpl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
@@ -22,7 +22,7 @@ public class JwtUtil {
     private String SECRET_KEY = "secret";
 
     @Autowired
-    private UsuarioService usuarioService;
+    private UsuarioServiceImpl usuarioServiceImpl;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -47,7 +47,7 @@ public class JwtUtil {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
+        Usuario usuario = usuarioServiceImpl.findByUsername(userDetails.getUsername());
 
         if(usuario == null) {
             throw new RegradeNegocioException("Usuário não encontrado");

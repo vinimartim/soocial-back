@@ -1,31 +1,45 @@
-package com.example.demo.services;
+package com.example.demo.services.impl;
 
+import com.example.demo.entity.Seguidores;
 import com.example.demo.entity.Usuario;
 import com.example.demo.exception.RegradeNegocioException;
+import com.example.demo.repository.SeguidoresRepository;
 import com.example.demo.repository.UsuarioRepository;
+import com.example.demo.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class UsuarioService {
+public class UsuarioServiceImpl extends UsuarioService {
     
     @Autowired
     private final UsuarioRepository repository;
+    
+    @Autowired
+    private SeguidoresRepository seguidoresRepository;
 
-    public UsuarioService(UsuarioRepository repository) {
+    public UsuarioServiceImpl(UsuarioRepository repository) {
         this.repository = repository;
     }
 
     public Usuario save(Usuario entity) {
         Usuario usuarioExistente = repository.findByUsername(entity.getUsername());
+        Usuario usuario;
 
         if(usuarioExistente != null && !usuarioExistente.equals(entity)) {
             throw new RegradeNegocioException("Já existe um usuário cadastrado com esse username");
         }
 
-        return repository.save(entity);
+        usuario = repository.save(entity);
+
+        Seguidores seguidores = new Seguidores();
+        seguidores.setEstaSeguindo(entity);
+        seguidores.setQuemSegue(entity);
+        seguidoresRepository.save(seguidores);
+
+        return usuario;
     }
 
     public Usuario update(Usuario entity) {
@@ -55,6 +69,5 @@ public class UsuarioService {
     public List<Usuario> findAll() {
         return repository.findAll();
     }
-
-    //public List<Usuario> findSeguidoresById(Long id) { return repository.findSeguidoresById(id); }
+    public boolean existsById(Long id) { return repository.existsById(id); }
 }

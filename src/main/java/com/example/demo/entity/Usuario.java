@@ -8,9 +8,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -80,11 +77,10 @@ public class Usuario implements Serializable, UserDetails {
 
     @JsonIgnore
     @OneToMany(mappedBy = "usuario")
-    private List<Post> post;
+    private List<Post> posts;
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @Column(columnDefinition = "VARCHAR(10) default ROLE_USER", insertable = false, updatable = true)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "usuarios_roles",
             joinColumns = @JoinColumn(name = "usuario_id", referencedColumnName = "id"),
@@ -99,6 +95,10 @@ public class Usuario implements Serializable, UserDetails {
     @JsonIgnore
     @OneToMany(mappedBy = "dono")
     private List<Grupo> grupos;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "membros")
+    private List<Grupo> ehMembro;
 
     @JsonIgnore
     @Override

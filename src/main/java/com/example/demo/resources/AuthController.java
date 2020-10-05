@@ -5,9 +5,9 @@ import com.example.demo.entity.AuthResponse;
 import com.example.demo.entity.Session;
 import com.example.demo.entity.Usuario;
 import com.example.demo.exception.RegradeNegocioException;
-import com.example.demo.services.AuthService;
-import com.example.demo.services.SessionService;
-import com.example.demo.services.UsuarioService;
+import com.example.demo.services.impl.AuthServiceImpl;
+import com.example.demo.services.impl.SessionServiceImpl;
+import com.example.demo.services.impl.UsuarioServiceImpl;
 import com.example.demo.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -35,13 +35,13 @@ public class AuthController {
     private JwtUtil jwtTokenUtil;
 
     @Autowired
-    private UsuarioService usuarioService;
+    private UsuarioServiceImpl usuarioServiceImpl;
 
     @Autowired
-    private AuthService authService;
+    private AuthServiceImpl authServiceImpl;
 
     @Autowired
-    private SessionService sessionService;
+    private SessionServiceImpl sessionServiceImpl;
 
     @PostMapping
     public ResponseEntity<?> createAuthToken(@RequestBody AuthRequest authRequest) throws RegradeNegocioException {
@@ -57,21 +57,14 @@ public class AuthController {
 
         final String mensagem = "Autorização efetuada com sucesso";
         final String jwt = jwtTokenUtil.generateToken(userDetails);
-
-
-        final Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
-
-        if(usuario == null) {
-            throw new RegradeNegocioException("Usuário não encontrado");
-        }
-
+        final Usuario usuario = usuarioServiceImpl.findByUsername(userDetails.getUsername());
 
         Session session = new Session(jwt, usuario);
-        sessionService.save(session);
+        sessionServiceImpl.save(session);
 
         // Atualiza o último login
         usuario.setLoginAt(LocalDateTime.now());
-        usuarioService.save(usuario);
+        usuarioServiceImpl.update(usuario);
 
         return ResponseEntity.ok(new AuthResponse(mensagem, jwt, usuario));
     }
