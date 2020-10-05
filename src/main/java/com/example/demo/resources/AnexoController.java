@@ -1,7 +1,7 @@
 package com.example.demo.resources;
 
 import com.example.demo.entity.Anexo;
-import com.example.demo.services.AnexoStorageService;
+import com.example.demo.services.impl.AnexoServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,22 +26,23 @@ public class AnexoController {
     private static final Logger logger = LoggerFactory.getLogger(AnexoController.class);
 
     @Autowired
-    private AnexoStorageService anexoStorageService;
+    private AnexoServiceImpl anexoServiceImpl;
 
-    @PostMapping
-    public ResponseEntity<Anexo> uploadFile(@RequestParam("anexo") MultipartFile arquivo) {
-        String nomeAnexo = anexoStorageService.storeAnexo(arquivo);
-        Anexo anexo = anexoStorageService.setAnexo(arquivo);
+    @RequestMapping(headers=("content-type=multipart/*"), method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<Anexo> uploadFile(@RequestParam("anexo") MultipartFile anexo) {
+        String nomeAnexo = anexoServiceImpl.storeAnexo(anexo);
+        Anexo anexoReq = anexoServiceImpl.setAnexo(anexo);
 
         String anexoDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/api/anexo/download/")
                 .path(nomeAnexo)
                 .toUriString();
 
-        anexo.setPath(anexoDownloadUri);
+        anexoReq.setPath(anexoDownloadUri);
 
-        if(anexoStorageService.save(anexo) != null) {
-            return new ResponseEntity<>(anexo, CREATED);
+        if(anexoServiceImpl.save(anexoReq) != null) {
+            return new ResponseEntity<>(anexoReq, CREATED);
         }
 
         return ResponseEntity.badRequest().build();
@@ -49,10 +50,8 @@ public class AnexoController {
 
     @GetMapping("download/{nomeAnexo}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String nomeAnexo, HttpServletRequest request) {
-        // Load file as Resource
-        Resource resource = anexoStorageService.loadAnexoAsResource(nomeAnexo);
+        Resource resource = anexoServiceImpl.loadAnexoAsResource(nomeAnexo);
 
-        // Try to determine file's content type
         String contentType = null;
         try {
             contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());

@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,8 +28,8 @@ public class Envio implements Serializable {
     @Column
     private LocalDateTime dataHoraEdicao;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "mensagem")
+    @JsonIgnore
+    @OneToOne(mappedBy = "envio")
     private Mensagem mensagem;
 
     @ManyToOne

@@ -2,23 +2,27 @@ package com.example.demo.resources;
 
 import com.example.demo.dto.MensagemDTO;
 import com.example.demo.dto.assember.MensagemAssember;
+import com.example.demo.entity.Anexo;
 import com.example.demo.entity.Envio;
 import com.example.demo.entity.Mensagem;
 import com.example.demo.entity.Usuario;
-import com.example.demo.exception.RegradeNegocioException;
-import com.example.demo.services.EnvioService;
-import com.example.demo.services.MensagemService;
-import com.example.demo.services.UsuarioService;
+import com.example.demo.services.impl.AnexoServiceImpl;
+import com.example.demo.services.impl.EnvioServiceImpl;
+import com.example.demo.services.impl.MensagemServiceImpl;
+import com.example.demo.services.impl.UsuarioServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -26,77 +30,72 @@ import static org.springframework.http.HttpStatus.*;
 public class MensagemController {
 
     @Autowired
-    private MensagemService service;
+    private MensagemServiceImpl mensagemServiceImpl;
 
     @Autowired
-    private UsuarioService usuarioService;
+    private UsuarioServiceImpl usuarioServiceImpl;
 
     @Autowired
-    private EnvioService envioService;
+    private EnvioServiceImpl envioServiceImpl;
+
+    @Autowired
+    private AnexoServiceImpl anexoServiceImpl;
 
     @GetMapping("{id}")
-    @ResponseStatus(OK)
-    public Mensagem get(@PathVariable(value = "id") Long id) {
-         return service
-            .findById(id)
-            .orElseThrow(() -> new RegradeNegocioException("Mensagem não encontrada"));
+    public ResponseEntity<Mensagem> getById(@PathVariable(value = "id") Long id) {
+         return ResponseEntity.ok(mensagemServiceImpl.findById(id));
     }
 
     @GetMapping
-    @ResponseStatus(OK)
-    public List<Mensagem> getAll() {
-        return service.findAll();
+    public ResponseEntity<List<Mensagem>> getAll() {
+        return ResponseEntity.ok(mensagemServiceImpl.findAll());
     }
 
-    @PostMapping
-    @ResponseStatus(CREATED)
-    public ResponseEntity<Mensagem> add(@Valid @RequestBody MensagemDTO mensagemDTO) {
+    @RequestMapping(headers=("content-type=multipart/*"), method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<Mensagem> add(@RequestPart("mensagemDTO") String mensagemDTOString,
+                                    @Nullable @RequestPart(value = "anexo", required = false) MultipartFile anexo) throws Exception {
+        MensagemDTO mensagemDTO = new ObjectMapper().readValue(mensagemDTOString, MensagemDTO.class);
         Mensagem mensagem = MensagemAssember.dtoToEntityModel(mensagemDTO);
 
-        Envio envio = envioService.setarEnvio(mensagemDTO);
-        envio.setMensagem(mensagem);
+        if(anexo != null) {
+            Anexo anexoValidadoSalvo = anexoServiceImpl.validaAnexo(anexo);
 
-        if(service.save(mensagem) != null && envioService.save(envio) != null) {
-            return new ResponseEntity<>(mensagem, CREATED);
+            if (anexoValidadoSalvo != null) {
+                mensagem.setAnexo(anexoValidadoSalvo);
+            }
+        } else {
+            mensagem.setAnexo(null);
         }
 
-        return ResponseEntity.badRequest().build();
+        return new ResponseEntity<>(mensagemServiceImpl.save(mensagem), CREATED);
     }
 
     @PutMapping("{id}")
-    @ResponseStatus(NO_CONTENT)
-    public ResponseEntity<Mensagem> update(@PathVariable(value = "id") Long id, @RequestBody MensagemDTO mensagemDTO) {
+    public ResponseEntity<Mensagem> update(@PathVariable(value = "id") Long id, @Valid @RequestBody MensagemDTO mensagemDTO) {
+
         Mensagem mensagem = MensagemAssember.dtoToEntityModel(mensagemDTO);
 
-        if(!service.existsById(id)) return ResponseEntity.notFound().build();
-
+        if(!mensagemServiceImpl.existsById(id)) return ResponseEntity.notFound().build();
         mensagem.setId(id);
-        service.save(mensagem);
 
-        return new ResponseEntity<>(mensagem, NO_CONTENT);
+        return new ResponseEntity<>(mensagemServiceImpl.update(mensagem), NO_CONTENT);
     }
 
     @DeleteMapping("{id}")
-    @ResponseStatus(NO_CONTENT)
     public void delete(@PathVariable(value = "id") Long id) {
-        Mensagem mensagem = service
-                .findById(id)
-                .orElseThrow(() -> new RegradeNegocioException("Mensagem não encontrada"));
+        Mensagem mensagem = mensagemServiceImpl.findById(id);
+        Envio envio = envioServiceImpl.findByMensagem(mensagem);
 
-        Envio envio = envioService
-                .findByMensagem(mensagem)
-                .orElseThrow(() -> new RegradeNegocioException("Dados da mensagem não encontrados"));
-
-        envioService.delete(envio);
-        service.delete(mensagem);
+        envioServiceImpl.delete(envio);
+        mensagemServiceImpl.delete(mensagem);
     }
 
     @GetMapping("/usuario/{id}")
-    @ResponseStatus(OK)
     public ResponseEntity<List<Mensagem>> getAllByUsuarioId(@PathVariable(value = "id") Long id) {
-        Usuario usuario = usuarioService.findById(id);
+        Usuario usuario = usuarioServiceImpl.findById(id);
 
-        List<Envio> listaEnvio = envioService.findAllByDestinatario(usuario);
+        List<Envio> listaEnvio = envioServiceImpl.findAllByDestinatario(usuario);
         ArrayList<Mensagem> listaMensagem = new ArrayList<>();
 
         for(Envio e : listaEnvio) {
@@ -104,5 +103,17 @@ public class MensagemController {
         }
 
         return ResponseEntity.ok(listaMensagem);
+    }
+
+    @GetMapping("destinatario/{id}")
+    public ResponseEntity<List<Mensagem>> getAllByDestinatario(@PathVariable(value = "id") Long id) {
+        Usuario usuario = usuarioServiceImpl.findById(id);
+        return ResponseEntity.ok(mensagemServiceImpl.findAllByDestinatario(id));
+    }
+
+    @GetMapping("remetente/{id}")
+    public ResponseEntity<List<Mensagem>> getAllByRemetente(@PathVariable(value = "id") Long id) {
+        Usuario usuario = usuarioServiceImpl.findById(id);
+        return ResponseEntity.ok(mensagemServiceImpl.findAllByRemetente(id));
     }
 }

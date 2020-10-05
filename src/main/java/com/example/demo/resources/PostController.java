@@ -2,19 +2,27 @@ package com.example.demo.resources;
 
 import com.example.demo.dto.PostDTO;
 import com.example.demo.dto.assember.PostAssember;
+import com.example.demo.entity.Anexo;
+import com.example.demo.entity.Grupo;
 import com.example.demo.entity.Post;
 import com.example.demo.entity.Usuario;
-import com.example.demo.services.PostService;
-
-import com.example.demo.services.UsuarioService;
+import com.example.demo.services.impl.AnexoServiceImpl;
+import com.example.demo.services.impl.PostServiceImpl;
+import com.example.demo.services.impl.UsuarioServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import static org.springframework.http.HttpStatus.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -22,73 +30,99 @@ import java.util.stream.Collectors;
 public class PostController {
 
     @Autowired
-    private PostService service;
+    private PostServiceImpl postServiceImpl;
 
     @Autowired
-    private UsuarioService usuarioService;
+    private UsuarioServiceImpl usuarioServiceImpl;
+
+    @Autowired
+    private AnexoServiceImpl anexoServiceImpl;
 
     @GetMapping("{id}")
-    @ResponseStatus(OK)
-    public Post get(@PathVariable(value = "id") Long id) {
-        return service
-            .findById(id)
-            .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Post não encontrado"));
+    public ResponseEntity<Post> getById(@PathVariable(value = "id") Long id) {
+        return ResponseEntity.ok(postServiceImpl.findById(id));
     }
 
     @GetMapping
-    @ResponseStatus(OK)
-    public List<Post> getAll() {
-        return service.findAll().stream().sorted().collect(Collectors.toList());
+    public ResponseEntity<List<Post>> getAll() {
+        return ResponseEntity.ok(postServiceImpl.findAll());
     }
 
-    @PostMapping
-    @ResponseStatus(CREATED)
-    public ResponseEntity<Post> add(@RequestBody PostDTO postDTO) throws Exception {
+    @RequestMapping(headers=("content-type=multipart/*"), method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<Post> add(@RequestPart("postDTO") String postDTOString,
+                                    @RequestPart(value = "anexo", required = false) MultipartFile anexo) throws Exception {
 
+        PostDTO postDTO = new ObjectMapper().readValue(postDTOString, PostDTO.class);
         Post post = PostAssember.dtoToEntityModel(postDTO);
 
-        if(service.save(post) != null) {
-            return new ResponseEntity<>(post, CREATED);
+        if(anexo != null) {
+            Anexo anexoValidadoSalvo = anexoServiceImpl.validaAnexo(anexo);
+
+            if(anexoValidadoSalvo != null) {
+                post.setAnexo(anexoValidadoSalvo);
+            }
+        } else {
+            post.setAnexo(null);
         }
 
-        return ResponseEntity.badRequest().build();
+        return new ResponseEntity<>(postServiceImpl.save(post), CREATED);
     }
 
     @PutMapping("{id}")
-    @ResponseStatus(NO_CONTENT)
-    public Post update(@PathVariable(value = "id") Long id, @RequestBody Post post) {
-        return service
-            .findById(id)
-            .map(postExistente -> {
-                post.setId(postExistente.getId());
-                try {
-                    service.save(post);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return postExistente;
-            })
-            .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Post não encontrado"));
+    public ResponseEntity<Post> update(@PathVariable(value = "id") Long id, @Valid @RequestBody PostDTO postDTO) throws Exception {
+        Post post = PostAssember.dtoToEntityModel(postDTO);
+
+        if(!postServiceImpl.existsById(id)) return ResponseEntity.notFound().build();
+        post.setId(id);
+
+        return new ResponseEntity<>(postServiceImpl.save(post), NO_CONTENT);
     }
 
     @DeleteMapping("{id}")
-    @ResponseStatus(NO_CONTENT)
     public void delete(@PathVariable(value = "id") Long id) {
-        service
-            .findById(id)
-            .map(post -> {
-                service.delete(post);
-                return post;
-            })
-            .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Post não encontrado"));
+       Post post = postServiceImpl.findById(id);
+       postServiceImpl.delete(post);
     }
 
     @GetMapping("usuario/{id}")
     public List<Post> getAllByUsuario(@PathVariable(value = "id") Long id) {
-        Usuario usuario = usuarioService.findById(id);
+        Usuario usuario = usuarioServiceImpl.findById(id);
+        List<Post> postList = postServiceImpl.findByUsuario(usuario, Sort.by("dataPostagem").ascending());
+        List<Post> timelinePosts = new ArrayList<>();
 
-        List<Post> postArrayList = service.findByUsuario(usuario);
-        Collections.reverse(postArrayList);
-        return postArrayList;
+        if(postList != null) {
+            for(Post p : postList) {
+                if (p.getGrupo() == null) {
+                    timelinePosts.add(p);
+                }
+            }
+            return timelinePosts;
+        }
+
+        return null;
+    }
+
+    @GetMapping("grupo/{grupo}")
+    public ResponseEntity<List<Post>> getAllByGrupo(@PathVariable(value = "grupo") Grupo grupo) {
+        return ResponseEntity.ok(postServiceImpl.findAllByGrupo(grupo));
+    }
+
+    @GetMapping("perfil/{usuario}")
+    public ResponseEntity<List<Post>> getAllByPerfilUsuario(@PathVariable(value = "usuario") Usuario usuario) {
+        List<Post> postList = postServiceImpl.findByUsuario(usuario, Sort.by("dataPostagem").descending());
+        List<Post> timelinePosts = new ArrayList<>();
+
+        if(postList != null) {
+            for (Post p : postList) {
+                if (p.getGrupo() == null) {
+                    timelinePosts.add(p);
+                }
+            }
+
+            return ResponseEntity.ok(timelinePosts);
+        }
+
+        return null;
     }
 }

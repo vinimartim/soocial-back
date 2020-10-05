@@ -1,12 +1,12 @@
 package com.example.demo.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -22,17 +22,27 @@ public class Post {
     @Column
     private String conteudo;
 
-    @Column(columnDefinition = "TINYINT default 0", insertable = false, updatable = true)
+    @Column
+    private LocalDateTime dataPostagem;
+
+    @Column
     private boolean edicao;
 
-    @Column(columnDefinition = "TINYINT default 0", insertable = false, updatable = true)
+    @Column
     private boolean spam;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @Column
+    private boolean denuncia;
+
+    @Column
+    private String privacidade;
+
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "anexo_id")
     private Anexo anexo;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
@@ -40,4 +50,9 @@ public class Post {
     @ManyToOne
     @JoinColumn(name = "grupo")
     private Grupo grupo;
+
+    @PrePersist
+    public void setDataPostagem() {
+        this.dataPostagem = LocalDateTime.now();
+    }
 }

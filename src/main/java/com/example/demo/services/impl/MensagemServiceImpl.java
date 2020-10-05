@@ -1,0 +1,56 @@
+package com.example.demo.services.impl;
+
+import com.example.demo.entity.Mensagem;
+import com.example.demo.exception.RegradeNegocioException;
+import com.example.demo.repository.MensagemRepository;
+import com.example.demo.services.MensagemService;
+import com.example.demo.utils.classificador.Classificador;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+public class MensagemServiceImpl implements MensagemService {
+    
+    @Autowired
+    private MensagemRepository repository;
+
+    public MensagemServiceImpl() {}
+
+    public Mensagem save(Mensagem entity) throws Exception {
+        Classificador classificador = new Classificador();
+        String conteudoMensagem = entity.getConteudo();
+        double[] classificada = classificador.classificar(conteudoMensagem);
+
+        entity.setSpam(!(classificada[0] > classificada[2]));
+        return repository.save(entity);
+    }
+
+    public Mensagem update(Mensagem entity) { return repository.save(entity); }
+
+    public void delete(Mensagem entity) {
+        repository.delete(entity);
+    }
+
+    public Mensagem findById(Long id) {
+
+        return repository
+                .findById(id)
+                .orElseThrow(() -> new RegradeNegocioException("Mensagem não encontrada"));
+    }
+
+    public List<Mensagem> findAll() {
+        return repository.findAll();
+    }
+
+    public boolean existsById(Long id) { return repository.existsById(id); }
+
+    public List<Mensagem> findAllByDestinatario(Long id) {
+        return repository.findAllByDestinatario(id);
+    }
+
+    public List<Mensagem> findAllByRemetente(Long id) {
+        return repository.findAllByRemetente(id);
+    }
+}

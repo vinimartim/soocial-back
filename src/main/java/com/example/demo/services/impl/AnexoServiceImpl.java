@@ -1,4 +1,4 @@
-package com.example.demo.services;
+package com.example.demo.services.impl;
 
 import com.example.demo.entity.Anexo;
 import com.example.demo.exception.AnexoNotFoundException;
@@ -6,12 +6,14 @@ import com.example.demo.exception.AnexoStorageException;
 import com.example.demo.exception.RegradeNegocioException;
 import com.example.demo.property.AnexoStorageProperties;
 import com.example.demo.repository.AnexoRepository;
+import com.example.demo.services.AnexoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -22,7 +24,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
 @Service
-public class AnexoStorageService {
+public class AnexoServiceImpl implements AnexoService {
 
     private final Path fileStorageLocation;
 
@@ -30,7 +32,7 @@ public class AnexoStorageService {
     private AnexoRepository repository;
 
     @Autowired
-    public AnexoStorageService(AnexoStorageProperties fileStorageProperties) {
+    public AnexoServiceImpl(AnexoStorageProperties fileStorageProperties) {
         this.fileStorageLocation = Paths.get(fileStorageProperties.getUploadDir())
                 .toAbsolutePath().normalize();
 
@@ -80,6 +82,7 @@ public class AnexoStorageService {
     }
 
     public Anexo setAnexo(MultipartFile arquivo) {
+
         if(!arquivo.getContentType().contains("jpeg") &&
                 !arquivo.getContentType().contains("gif") &&
                 !arquivo.getContentType().contains("png")) {
@@ -96,5 +99,24 @@ public class AnexoStorageService {
         anexo.setTamanho(arquivo.getSize());
 
         return anexo;
+    }
+
+    public Anexo findById(Long id) {
+        return repository
+                .findById(id)
+                .orElseThrow(() -> new RegradeNegocioException("Anexo não encontrado"));
+    }
+
+    public Anexo validaAnexo(MultipartFile anexo) {
+        String nomeAnexo = this.storeAnexo(anexo);
+        Anexo anexoReq = this.setAnexo(anexo);
+
+        String anexoDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/anexo/download/")
+                .path(nomeAnexo)
+                .toUriString();
+
+        anexoReq.setPath(anexoDownloadUri);
+        return this.save(anexoReq);
     }
 }
