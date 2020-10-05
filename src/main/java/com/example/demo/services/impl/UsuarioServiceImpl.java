@@ -16,7 +16,7 @@ public class UsuarioServiceImpl extends UsuarioService {
     
     @Autowired
     private final UsuarioRepository repository;
-    
+
     @Autowired
     private SeguidoresRepository seguidoresRepository;
 
