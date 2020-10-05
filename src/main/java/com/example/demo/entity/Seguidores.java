@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import javax.persistence.*;
 
@@ -19,13 +18,12 @@ public class Seguidores {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
-    @JsonIgnore
+    
     @ManyToOne
     @JoinColumn(name = "quem_segue")
     private Usuario quemSegue;
 
     @ManyToOne
-    @JoinColumn(name = "seguindo")
+    @JoinColumn(name = "esta_seguindo")
     private Usuario estaSeguindo;
 }

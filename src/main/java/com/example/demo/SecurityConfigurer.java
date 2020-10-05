@@ -1,7 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.filters.JwtRequestFilter;
-import com.example.demo.services.MyUserDetailsService;
+import com.example.demo.services.impl.MyUserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -23,14 +23,14 @@ import java.util.Collections;
 public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private MyUserDetailsService myUserDetailsService;
+    private MyUserDetailsServiceImpl myUserDetailsServiceImpl;
 
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(myUserDetailsService);
+        auth.userDetailsService(myUserDetailsServiceImpl);
     }
 
     @Override
@@ -39,6 +39,7 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS,"*").permitAll()
                 .antMatchers("/api/auth").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/anexo/download/*").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/usuario").permitAll()
                 .anyRequest()
                 .authenticated()

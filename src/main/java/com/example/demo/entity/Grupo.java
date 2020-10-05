@@ -1,10 +1,12 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Data
@@ -19,7 +21,7 @@ public class Grupo {
     @Column
     private Long id;
 
-    @Column
+    @Column(unique = true)
     private String nome;
 
     @Column
@@ -28,11 +30,14 @@ public class Grupo {
     @Column
     private String privacidade;
 
+    @Column
+    private String categoria;
+
     @ManyToOne
     @JoinColumn(name = "dono")
     private Usuario dono;
 
-    @OneToMany
+    @ManyToMany
     @JoinTable(
             name = "grupo_admins",
             joinColumns = @JoinColumn(name = "grupo_id", referencedColumnName = "id"),

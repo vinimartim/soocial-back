@@ -1,15 +1,20 @@
 package com.example.demo.resources;
 
+import com.example.demo.dto.GrupoDTO;
+import com.example.demo.dto.assember.GrupoAssember;
 import com.example.demo.entity.Grupo;
-import com.example.demo.services.GrupoService;
-
+import com.example.demo.entity.Usuario;
+import com.example.demo.services.impl.GrupoServiceImpl;
+import com.example.demo.services.impl.UsuarioServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import static org.springframework.http.HttpStatus.*;
-
+import javax.validation.Valid;
 import java.util.List;
+
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -17,50 +22,61 @@ import java.util.List;
 public class GrupoController {
 
     @Autowired
-    private GrupoService service;
+    private GrupoServiceImpl grupoServiceImpl;
+
+    @Autowired
+    private UsuarioServiceImpl usuarioServiceImpl;
 
     @GetMapping("{id}")
-    @ResponseStatus(OK)
-    public Grupo get(@PathVariable(value = "id") Long id) {
-        return service
-            .findById(id)
-            .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Grupo não encpntrado"));
+    public ResponseEntity<Grupo> getById(@PathVariable(value = "id") Long id) {
+        return ResponseEntity.ok(grupoServiceImpl.findById(id));
     }
 
     @GetMapping
-    @ResponseStatus(OK)
-    public List<Grupo> getAll() {
-        return service.findAll();
+    public ResponseEntity<List<Grupo>> getAll() {
+        return ResponseEntity.ok(grupoServiceImpl.findAll());
     }
 
     @PostMapping
-    @ResponseStatus(CREATED)
-    public Grupo add(@RequestBody Grupo grupo) {
-        return service.save(grupo);
+    public ResponseEntity<Grupo> add(@RequestBody GrupoDTO grupoDTO) {
+        Grupo grupo = GrupoAssember.dtoToEntityModel(grupoDTO);
+        return new ResponseEntity<>(grupoServiceImpl.save(grupo), CREATED);
     }
 
     @PutMapping("{id}")
-    @ResponseStatus(NO_CONTENT)
-    public Grupo update(@PathVariable(value = "id") Long id, @RequestBody Grupo grupo) {
-        return service
-            .findById(id)
-            .map(grupoExistente -> {
-                grupo.setId(grupoExistente.getId());
-                service.save(grupo);
-                return grupoExistente;
-            })
-            .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Grupo não encontrado"));
+    public ResponseEntity<Grupo> update(@PathVariable(value = "id") Long id, @Valid @RequestBody GrupoDTO grupoDTO) {
+        Grupo grupo = GrupoAssember.dtoToEntityModel(grupoDTO);
+
+        if(!grupoServiceImpl.existsById(id)) return ResponseEntity.notFound().build();
+        grupo.setId(id);
+
+        return new ResponseEntity<>(grupoServiceImpl.update(grupo), NO_CONTENT);
     }
 
     @DeleteMapping("{id}")
-    @ResponseStatus(NO_CONTENT)
     public void delete(@PathVariable(value = "id") Long id) {
-        service
-            .findById(id)
-            .map(grupo -> {
-                service.delete(grupo);
-                return grupo;
-            })
-            .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Grupo não encontrado"));
+        Grupo grupo = grupoServiceImpl.findById(id);
+        grupoServiceImpl.delete(grupo);
+    }
+
+    @GetMapping("dono/{donoId}")
+    public ResponseEntity<List<Grupo>> getByDono(@PathVariable(value = "donoId") Long donoId) {
+        Usuario dono = usuarioServiceImpl.findById(donoId);
+        return ResponseEntity.ok(grupoServiceImpl.findByDono(dono));
+    }
+
+    @GetMapping("membro/{membro}")
+    public ResponseEntity<List<Grupo>> getByMembro(@PathVariable(value = "membro") Usuario membro) {
+        return ResponseEntity.ok(grupoServiceImpl.findByMembros(membro));
+    }
+
+    @GetMapping("membros/{grupo}")
+    public ResponseEntity<List<Usuario>> getMembroById(@PathVariable(value = "grupo") Grupo grupo) {
+        return ResponseEntity.ok(grupoServiceImpl.findMembrosByGrupo(grupo));
+    }
+
+    @GetMapping("admins/{grupo}")
+    public ResponseEntity<List<Usuario>> getAdmsById(@PathVariable(value = "grupo") Grupo grupo) {
+        return ResponseEntity.ok(grupoServiceImpl.findAdmsByGrupo(grupo));
     }
 }
