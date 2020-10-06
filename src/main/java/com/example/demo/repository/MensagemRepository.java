@@ -10,9 +10,9 @@ import java.util.List;
 
 public interface MensagemRepository extends JpaRepository<Mensagem, Long>{
 
-    @Query(value = "select * from mensagem inner join envio on destinatario = ?1 group by assunto", nativeQuery = true)
+    @Query(value = "select * from mensagem m inner join envio on destinatario = ?1 group by m.id", nativeQuery = true)
     List<Mensagem> findAllByDestinatario(Long id);
 
-    @Query(value = "select * from mensagem inner join envio on remetente = ?1 group by assunto", nativeQuery = true)
+    @Query(value = "select * from mensagem m inner join envio on remetente = ?1 group by m.id", nativeQuery = true)
     List<Mensagem> findAllByRemetente(Long id);
 }

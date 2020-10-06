@@ -11,7 +11,6 @@ import java.util.Optional;
 public interface EnvioRepository extends JpaRepository<Envio, Long> {
 
     Optional<Envio> findByMensagem(Mensagem mensagem);
-    boolean existsByMensagem(Mensagem mensagem);
     List<Envio> findAllByDestinatario(Usuario usuario);
     List<Envio> findAllByRemetente(Usuario usuario);
 }

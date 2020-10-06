@@ -58,12 +58,10 @@ public class MensagemController {
         MensagemDTO mensagemDTO = new ObjectMapper().readValue(mensagemDTOString, MensagemDTO.class);
         Mensagem mensagem = MensagemAssember.dtoToEntityModel(mensagemDTO);
 
-        if(anexo != null) {
-            Anexo anexoValidadoSalvo = anexoServiceImpl.validaAnexo(anexo);
 
-            if (anexoValidadoSalvo != null) {
-                mensagem.setAnexo(anexoValidadoSalvo);
-            }
+        if(anexo != null) {
+            Anexo anexoValidado = anexoServiceImpl.validaAnexo(anexo);
+            mensagem.setAnexo(anexoValidado);
         } else {
             mensagem.setAnexo(null);
         }
@@ -91,28 +89,17 @@ public class MensagemController {
         mensagemServiceImpl.delete(mensagem);
     }
 
-    @GetMapping("/usuario/{id}")
-    public ResponseEntity<List<Mensagem>> getAllByUsuarioId(@PathVariable(value = "id") Long id) {
-        Usuario usuario = usuarioServiceImpl.findById(id);
-
-        List<Envio> listaEnvio = envioServiceImpl.findAllByDestinatario(usuario);
-        ArrayList<Mensagem> listaMensagem = new ArrayList<>();
-
-        for(Envio e : listaEnvio) {
-            listaMensagem.add(e.getMensagem());
-        }
-
-        return ResponseEntity.ok(listaMensagem);
-    }
-
+    // Retorna todas as mensagens de um determinado destinatario
     @GetMapping("destinatario/{id}")
     public ResponseEntity<List<Mensagem>> getAllByDestinatario(@PathVariable(value = "id") Long id) {
         Usuario usuario = usuarioServiceImpl.findById(id);
         return ResponseEntity.ok(mensagemServiceImpl.findAllByDestinatario(id));
     }
 
+    // Retorna todas as mensagens de um determinado remetente
     @GetMapping("remetente/{id}")
     public ResponseEntity<List<Mensagem>> getAllByRemetente(@PathVariable(value = "id") Long id) {
+        // Busca um usuário e se não encontra lança uma exceção
         Usuario usuario = usuarioServiceImpl.findById(id);
         return ResponseEntity.ok(mensagemServiceImpl.findAllByRemetente(id));
     }

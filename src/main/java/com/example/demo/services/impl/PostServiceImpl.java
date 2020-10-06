@@ -27,21 +27,11 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private AnexoServiceImpl anexoServiceImpl;
 
-    public Post save(Post entity) throws Exception{
-        Usuario usuario = usuarioServiceImpl.findById(entity.getUsuario().getId());
-        entity.setUsuario(usuario);
+    @Autowired
+    private Classificador classificador; // Carrega o dataset
 
-        if(entity.getAnexo() != null) {
-            Anexo anexo = anexoServiceImpl.findById(entity.getAnexo().getId());
-            entity.setAnexo(anexo);
-        }
-
-        Classificador classificador = new Classificador();
-        String conteudoPost = entity.getConteudo();
-        double[] classificada = classificador.classificar(conteudoPost);
-
-        entity.setSpam(!(classificada[0] > classificada[2]));
-
+    public Post save(Post entity) throws Exception {
+        entity.setSpam(classificador.classificar(entity.getConteudo()));
         return repository.save(entity);
     }
 
@@ -59,6 +49,10 @@ public class PostServiceImpl implements PostService {
 
     public List<Post> findAll() {
         return repository.findAll();
+    }
+
+    public List<Post> findBySeguidores(List<Long> seguidores, Sort dataPostagem) {
+        return repository.findBySeguidores(seguidores, dataPostagem);
     }
 
     public List<Post> findByUsuario(Usuario usuario, Sort dataPostagem) {

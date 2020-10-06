@@ -31,10 +31,6 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private UsuarioServiceImpl usuarioServiceImpl;
 
-    private String mensagem;
-    private String jwt;
-    private Usuario usuario;
-
     public Authentication authenticationToken(AuthRequest authRequest) throws Exception {
         try {
             return authenticationManager.authenticate(
@@ -46,11 +42,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public ResponseEntity<?> carregaToken(UserDetails userDetails) {
-        this.mensagem = "Autorização efetuada com sucesso";
-        this.jwt = jwtTokenUtil.generateToken(userDetails);
-        this.usuario = usuarioServiceImpl.findByUsername(userDetails.getUsername());
+        String mensagem = "Autorização efetuada com sucesso";
+        String jwt = jwtTokenUtil.generateToken(userDetails);
+        Usuario usuario = usuarioServiceImpl.findByUsername(userDetails.getUsername());
 
-        if(this.usuario == null) {
+        if(usuario == null) {
             throw new RegradeNegocioException("Usuário não encontrado");
         }
 

@@ -28,26 +28,6 @@ public class AnexoController {
     @Autowired
     private AnexoServiceImpl anexoServiceImpl;
 
-    @RequestMapping(headers=("content-type=multipart/*"), method = RequestMethod.POST)
-    @ResponseBody
-    public ResponseEntity<Anexo> uploadFile(@RequestParam("anexo") MultipartFile anexo) {
-        String nomeAnexo = anexoServiceImpl.storeAnexo(anexo);
-        Anexo anexoReq = anexoServiceImpl.setAnexo(anexo);
-
-        String anexoDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/anexo/download/")
-                .path(nomeAnexo)
-                .toUriString();
-
-        anexoReq.setPath(anexoDownloadUri);
-
-        if(anexoServiceImpl.save(anexoReq) != null) {
-            return new ResponseEntity<>(anexoReq, CREATED);
-        }
-
-        return ResponseEntity.badRequest().build();
-    }
-
     @GetMapping("download/{nomeAnexo}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String nomeAnexo, HttpServletRequest request) {
         Resource resource = anexoServiceImpl.loadAnexoAsResource(nomeAnexo);

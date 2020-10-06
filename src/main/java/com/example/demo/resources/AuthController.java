@@ -45,6 +45,7 @@ public class AuthController {
 
     @PostMapping
     public ResponseEntity<?> createAuthToken(@RequestBody AuthRequest authRequest) throws RegradeNegocioException {
+        
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getSenha())

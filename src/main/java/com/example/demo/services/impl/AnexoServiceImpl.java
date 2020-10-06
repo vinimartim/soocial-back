@@ -81,22 +81,18 @@ public class AnexoServiceImpl implements AnexoService {
         return repository.save(entity);
     }
 
-    public Anexo setAnexo(MultipartFile arquivo) {
-
-        if(!arquivo.getContentType().contains("jpeg") &&
-                !arquivo.getContentType().contains("gif") &&
-                !arquivo.getContentType().contains("png")) {
-            throw new RegradeNegocioException("A extensão do anexo é inválida. Extensões permitidas: jpeg, jpg, gif, png");
-        }
-
-        if(arquivo.getSize() > 35000000) {
-            throw new RegradeNegocioException("O tamanho máximo de anexo permitido é de 35Mb");
-        }
-
+    public Anexo setAnexo(MultipartFile arquivo, String nomeAnexo) {
         Anexo anexo = new Anexo();
         anexo.setNome(arquivo.getName());
         anexo.setExtensao(arquivo.getContentType());
         anexo.setTamanho(arquivo.getSize());
+
+        String anexoDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/anexo/download/")
+                .path(nomeAnexo)
+                .toUriString();
+
+        anexo.setPath(anexoDownloadUri);
 
         return anexo;
     }
@@ -109,14 +105,17 @@ public class AnexoServiceImpl implements AnexoService {
 
     public Anexo validaAnexo(MultipartFile anexo) {
         String nomeAnexo = this.storeAnexo(anexo);
-        Anexo anexoReq = this.setAnexo(anexo);
 
-        String anexoDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/anexo/download/")
-                .path(nomeAnexo)
-                .toUriString();
+        if(!anexo.getContentType().contains("jpeg") &&
+                !anexo.getContentType().contains("gif") &&
+                !anexo.getContentType().contains("png")) {
+            throw new RegradeNegocioException("A extensão do anexo é inválida. Extensões permitidas: jpeg, jpg, gif, png");
+        }
 
-        anexoReq.setPath(anexoDownloadUri);
-        return this.save(anexoReq);
+        if(anexo.getSize() > 35000000) {
+            throw new RegradeNegocioException("O tamanho máximo de anexo permitido é de 35Mb");
+        }
+
+        return this.setAnexo(anexo, nomeAnexo);
     }
 }

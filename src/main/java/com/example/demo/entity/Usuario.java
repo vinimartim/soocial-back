@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
+// Lombok
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -67,13 +68,6 @@ public class Usuario implements Serializable, UserDetails {
 
     @Column
     private String telefone;
-
-    @JsonIgnore
-    @OneToMany(
-            cascade = CascadeType.ALL,
-            mappedBy = "usuario"
-    )
-    private List<Colecao> colecao;
 
     @JsonIgnore
     @OneToMany(mappedBy = "usuario")

@@ -22,6 +22,11 @@ public class GrupoServiceImpl implements GrupoService {
     private UsuarioServiceImpl usuarioServiceImpl;
     
     public Grupo save(Grupo entity) {
+        return repository.save(entity);
+    }
+
+    public Grupo update(Grupo entity) {
+        // Checa se o administrador que deseja adiciona já é um membro do grupo
         for(Usuario u : entity.getAdministradores()) {
             if(!repository.existsByMembros(u)) {
                 throw new RegradeNegocioException("Para cadastrar um administrador ele precisa antes ser um membro do grupo");
@@ -29,8 +34,6 @@ public class GrupoServiceImpl implements GrupoService {
         }
         return repository.save(entity);
     }
-
-    public Grupo update(Grupo entity) { return repository.save(entity); }
 
     public boolean existsById(Long id) { return repository.existsById(id); }
 

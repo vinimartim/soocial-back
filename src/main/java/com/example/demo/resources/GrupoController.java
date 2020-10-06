@@ -59,24 +59,16 @@ public class GrupoController {
         grupoServiceImpl.delete(grupo);
     }
 
+    // Retorna todos os grupos de um determinado dono
     @GetMapping("dono/{donoId}")
     public ResponseEntity<List<Grupo>> getByDono(@PathVariable(value = "donoId") Long donoId) {
         Usuario dono = usuarioServiceImpl.findById(donoId);
         return ResponseEntity.ok(grupoServiceImpl.findByDono(dono));
     }
 
+    // Retornando todos os grupos de um determinado membro (usuario)
     @GetMapping("membro/{membro}")
     public ResponseEntity<List<Grupo>> getByMembro(@PathVariable(value = "membro") Usuario membro) {
         return ResponseEntity.ok(grupoServiceImpl.findByMembros(membro));
-    }
-
-    @GetMapping("membros/{grupo}")
-    public ResponseEntity<List<Usuario>> getMembroById(@PathVariable(value = "grupo") Grupo grupo) {
-        return ResponseEntity.ok(grupoServiceImpl.findMembrosByGrupo(grupo));
-    }
-
-    @GetMapping("admins/{grupo}")
-    public ResponseEntity<List<Usuario>> getAdmsById(@PathVariable(value = "grupo") Grupo grupo) {
-        return ResponseEntity.ok(grupoServiceImpl.findAdmsByGrupo(grupo));
     }
 }

@@ -23,5 +23,6 @@ public class PostDTO {
     private Usuario usuario;
     private Grupo grupo;
     private boolean denuncia;
+    private Anexo anexo;
 
 }

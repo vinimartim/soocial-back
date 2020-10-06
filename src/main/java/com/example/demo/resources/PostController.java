@@ -57,11 +57,8 @@ public class PostController {
         Post post = PostAssember.dtoToEntityModel(postDTO);
 
         if(anexo != null) {
-            Anexo anexoValidadoSalvo = anexoServiceImpl.validaAnexo(anexo);
-
-            if(anexoValidadoSalvo != null) {
-                post.setAnexo(anexoValidadoSalvo);
-            }
+            Anexo anexoValidado = anexoServiceImpl.validaAnexo(anexo);
+            post.setAnexo(anexoValidado);
         } else {
             post.setAnexo(null);
         }
@@ -85,44 +82,21 @@ public class PostController {
        postServiceImpl.delete(post);
     }
 
-    @GetMapping("usuario/{id}")
-    public List<Post> getAllByUsuario(@PathVariable(value = "id") Long id) {
-        Usuario usuario = usuarioServiceImpl.findById(id);
-        List<Post> postList = postServiceImpl.findByUsuario(usuario, Sort.by("dataPostagem").ascending());
-        List<Post> timelinePosts = new ArrayList<>();
-
-        if(postList != null) {
-            for(Post p : postList) {
-                if (p.getGrupo() == null) {
-                    timelinePosts.add(p);
-                }
-            }
-            return timelinePosts;
-        }
-
-        return null;
+    // Retorna os posts dos seus seguidores (você incluso)
+    @GetMapping("usuario/{usuarios}")
+    public List<Post> getAllBySeguidores(@PathVariable(value = "usuarios") List<Long> usuarios) {
+       return postServiceImpl.findBySeguidores(usuarios, Sort.by("dataPostagem").ascending());
     }
 
+    // Retorna os posts de um determinado grupo
     @GetMapping("grupo/{grupo}")
     public ResponseEntity<List<Post>> getAllByGrupo(@PathVariable(value = "grupo") Grupo grupo) {
         return ResponseEntity.ok(postServiceImpl.findAllByGrupo(grupo));
     }
 
+    // Retorna os posts do usuário
     @GetMapping("perfil/{usuario}")
     public ResponseEntity<List<Post>> getAllByPerfilUsuario(@PathVariable(value = "usuario") Usuario usuario) {
-        List<Post> postList = postServiceImpl.findByUsuario(usuario, Sort.by("dataPostagem").descending());
-        List<Post> timelinePosts = new ArrayList<>();
-
-        if(postList != null) {
-            for (Post p : postList) {
-                if (p.getGrupo() == null) {
-                    timelinePosts.add(p);
-                }
-            }
-
-            return ResponseEntity.ok(timelinePosts);
-        }
-
-        return null;
+        return ResponseEntity.ok(postServiceImpl.findByUsuario(usuario, Sort.by("dataPostagem").descending()));
     }
 }

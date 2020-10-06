@@ -19,6 +19,7 @@ public class SessionController {
     @Autowired
     private UsuarioServiceImpl usuarioServiceImpl;
 
+    // Retorna a sessão de um usuário
     @GetMapping
     public ResponseEntity<Session> getSession(@RequestHeader("Authorization") String token) {
         String[] jwt = token.split(" ");

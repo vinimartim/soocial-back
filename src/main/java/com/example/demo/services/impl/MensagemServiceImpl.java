@@ -16,14 +16,15 @@ public class MensagemServiceImpl implements MensagemService {
     @Autowired
     private MensagemRepository repository;
 
+    @Autowired
+    private Classificador classificador;
+
     public MensagemServiceImpl() {}
 
     public Mensagem save(Mensagem entity) throws Exception {
-        Classificador classificador = new Classificador();
-        String conteudoMensagem = entity.getConteudo();
-        double[] classificada = classificador.classificar(conteudoMensagem);
+        entity.setSpam(classificador.classificar(entity.getConteudo()));
 
-        entity.setSpam(!(classificada[0] > classificada[2]));
+
         return repository.save(entity);
     }
 

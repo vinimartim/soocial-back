@@ -19,6 +19,7 @@ public class MensagemAssember {
         mensagem.setSpam(dto.isSpam());
         mensagem.setEnvio(dto.getEnvio());
         mensagem.setVisualizada(dto.isVisualizada());
+        mensagem.setAnexo(dto.getAnexo());
 
         return mensagem;
     }

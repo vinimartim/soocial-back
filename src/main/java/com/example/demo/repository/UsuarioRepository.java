@@ -12,10 +12,13 @@ import java.util.Optional;
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     Usuario findByUsername(String username);
-    List<Usuario> findByEhMembro(Grupo grupo);
     @Query(value =
             "SELECT * FROM usuario u WHERE u.id IN (SELECT * FROM seguidores s WHERE s.usuario_id = :usuario_id)",
             nativeQuery = true
     )
     List<Usuario> findSeguidoresById(@Param("usuario_id") Long usuario_id);
+
+    List<Usuario> findByGenero(Usuario usuario);
+
+
 }
