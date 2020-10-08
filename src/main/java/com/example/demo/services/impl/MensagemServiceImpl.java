@@ -4,6 +4,7 @@ import com.example.demo.entity.Mensagem;
 import com.example.demo.exception.RegradeNegocioException;
 import com.example.demo.repository.MensagemRepository;
 import com.example.demo.services.MensagemService;
+import com.example.demo.services.UsuarioService;
 import com.example.demo.utils.classificador.Classificador;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,9 @@ public class MensagemServiceImpl implements MensagemService {
     private MensagemRepository repository;
 
     @Autowired
+    private UsuarioServiceImpl usuarioServiceImpl;
+
+    @Autowired
     private Classificador classificador;
 
     public MensagemServiceImpl() {}
@@ -24,6 +28,11 @@ public class MensagemServiceImpl implements MensagemService {
     public Mensagem save(Mensagem entity) throws Exception {
         entity.setSpam(classificador.classificar(entity.getConteudo()));
 
+        // Checa se remetente ou destinatário existem
+        if(usuarioServiceImpl.findById(entity.getEnvio().getRemetente().getId()) == null &&
+                usuarioServiceImpl.findById(entity.getEnvio().getDestinatario().getId()) == null) {
+            throw new RegradeNegocioException("Remetente ou destinatário inválido");
+        }
 
         return repository.save(entity);
     }

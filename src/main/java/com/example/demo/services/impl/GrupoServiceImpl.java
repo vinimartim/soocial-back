@@ -22,6 +22,12 @@ public class GrupoServiceImpl implements GrupoService {
     private UsuarioServiceImpl usuarioServiceImpl;
     
     public Grupo save(Grupo entity) {
+        Grupo grupoExistente = repository.findByNome(entity.getNome());
+
+        if(grupoExistente != null && !grupoExistente.equals(entity)) {
+            throw new RegradeNegocioException("Já existe um grupo com esse nome cadastrado");
+        }
+
         return repository.save(entity);
     }
 
@@ -45,6 +51,16 @@ public class GrupoServiceImpl implements GrupoService {
         return repository
                 .findById(id)
                 .orElseThrow(() -> new RegradeNegocioException("Grupo não encontrado"));
+    }
+
+    public Grupo findByNome(String nome) {
+        Grupo grupo = repository.findByNome(nome);
+
+        if(grupo == null) {
+            throw new RegradeNegocioException("Não foi encontrado nenhum grupo com esse nome");
+        }
+
+        return grupo;
     }
 
     public List<Grupo> findAll() {

@@ -106,7 +106,7 @@ public class AnexoServiceImpl implements AnexoService {
     public Anexo validaAnexo(MultipartFile anexo) {
         String nomeAnexo = this.storeAnexo(anexo);
 
-        if(!anexo.getContentType().contains("jpeg") &&
+        if(!Objects.requireNonNull(anexo.getContentType()).contains("jpeg") &&
                 !anexo.getContentType().contains("gif") &&
                 !anexo.getContentType().contains("png")) {
             throw new RegradeNegocioException("A extensão do anexo é inválida. Extensões permitidas: jpeg, jpg, gif, png");

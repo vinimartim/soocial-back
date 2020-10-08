@@ -46,7 +46,7 @@ public class Post {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    // Se o grupo for 0, significa que o post é da timeline
+    // Se o grupo for null, significa que o post é da timeline
     @ManyToOne
     @JoinColumn(name = "grupo")
     private Grupo grupo;

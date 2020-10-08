@@ -37,14 +37,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new RegradeNegocioException("Já existe um usuário cadastrado com esse username");
         }
 
-        usuario = repository.save(entity);
-
-        Seguidores seguidores = new Seguidores();
-        seguidores.setEstaSeguindo(entity);
-        seguidores.setQuemSegue(entity);
-        seguidoresRepository.save(seguidores);
-
-        return usuario;
+        return repository.save(entity);
     }
 
     public Usuario update(Usuario entity) {

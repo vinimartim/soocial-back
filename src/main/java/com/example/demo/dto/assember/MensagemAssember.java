@@ -8,10 +8,12 @@ import javax.persistence.EntityManager;
 
 public class MensagemAssember {
 
-    private static EntityManager entityManager;
-
+    /**
+     * Função que transforma um objeto DTO em um objeto
+     * @param dto o objeto dto
+     * @return mensagem
+     */
     public static Mensagem dtoToEntityModel(MensagemDTO dto) {
-
         Mensagem mensagem = new Mensagem();
         mensagem.setAssunto(dto.getAssunto());
         mensagem.setConteudo(dto.getConteudo());

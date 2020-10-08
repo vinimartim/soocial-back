@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,7 @@ public class GrupoDTO {
     @NotBlank
     private String privacidade;
 
-    @NotBlank
+    @NotNull
     private Usuario dono;
 
     private List<Usuario> administradores;

@@ -11,8 +11,12 @@ import java.util.List;
 @NoArgsConstructor
 public class UsuarioAssember {
 
+    /**
+     * Função que transforma um objeto DTO em um objeto
+     * @param dto o objeto dto
+     * @return usuario
+     */
     public static Usuario dtoToEntityModel(UsuarioDTO dto) {
-
         Usuario usuario = new Usuario();
         List<Role> roles = new ArrayList<>();
         Role role = new Role();

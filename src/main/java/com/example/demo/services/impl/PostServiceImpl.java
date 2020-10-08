@@ -32,6 +32,8 @@ public class PostServiceImpl implements PostService {
 
     public Post save(Post entity) throws Exception {
         entity.setSpam(classificador.classificar(entity.getConteudo()));
+        Usuario usuario = usuarioServiceImpl.findById(entity.getUsuario().getId());
+        entity.setUsuario(usuario);
         return repository.save(entity);
     }
 

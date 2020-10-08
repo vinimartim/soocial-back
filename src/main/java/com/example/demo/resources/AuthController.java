@@ -5,7 +5,6 @@ import com.example.demo.entity.AuthResponse;
 import com.example.demo.entity.Session;
 import com.example.demo.entity.Usuario;
 import com.example.demo.exception.RegradeNegocioException;
-import com.example.demo.services.impl.AuthServiceImpl;
 import com.example.demo.services.impl.SessionServiceImpl;
 import com.example.demo.services.impl.UsuarioServiceImpl;
 import com.example.demo.utils.JwtUtil;
@@ -36,9 +35,6 @@ public class AuthController {
 
     @Autowired
     private UsuarioServiceImpl usuarioServiceImpl;
-
-    @Autowired
-    private AuthServiceImpl authServiceImpl;
 
     @Autowired
     private SessionServiceImpl sessionServiceImpl;

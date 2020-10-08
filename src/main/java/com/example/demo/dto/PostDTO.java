@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Data
 @NoArgsConstructor
@@ -17,12 +18,16 @@ public class PostDTO {
 
     @NotBlank
     private String conteudo;
-    private boolean edicao;
+
+    @NotBlank
     private String privacidade;
-    private boolean spam;
+
+    @NotNull
     private Usuario usuario;
     private Grupo grupo;
-    private boolean denuncia;
     private Anexo anexo;
+    private boolean edicao;
+    private boolean spam;
+    private boolean denuncia;
 
 }

@@ -7,6 +7,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GrupoAssember {
 
+    /**
+     * Função que transforma um objeto DTO em um objeto
+     * @param dto o objeto dto
+     * @return grupo
+     */
     public static Grupo dtoToEntityModel(GrupoDTO dto) {
         Grupo grupo = new Grupo();
         grupo.setNome(dto.getNome());

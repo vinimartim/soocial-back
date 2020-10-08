@@ -3,11 +3,10 @@ package com.example.demo.resources;
 import com.example.demo.dto.MensagemDTO;
 import com.example.demo.dto.assember.MensagemAssember;
 import com.example.demo.entity.Anexo;
-import com.example.demo.entity.Envio;
 import com.example.demo.entity.Mensagem;
 import com.example.demo.entity.Usuario;
+import com.example.demo.exception.RegradeNegocioException;
 import com.example.demo.services.impl.AnexoServiceImpl;
-import com.example.demo.services.impl.EnvioServiceImpl;
 import com.example.demo.services.impl.MensagemServiceImpl;
 import com.example.demo.services.impl.UsuarioServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.CREATED;
@@ -34,9 +32,6 @@ public class MensagemController {
 
     @Autowired
     private UsuarioServiceImpl usuarioServiceImpl;
-
-    @Autowired
-    private EnvioServiceImpl envioServiceImpl;
 
     @Autowired
     private AnexoServiceImpl anexoServiceImpl;
@@ -55,9 +50,8 @@ public class MensagemController {
     @ResponseBody
     public ResponseEntity<Mensagem> add(@RequestPart("mensagemDTO") String mensagemDTOString,
                                     @Nullable @RequestPart(value = "anexo", required = false) MultipartFile anexo) throws Exception {
-        MensagemDTO mensagemDTO = new ObjectMapper().readValue(mensagemDTOString, MensagemDTO.class);
+        @Valid MensagemDTO mensagemDTO = new ObjectMapper().readValue(mensagemDTOString, MensagemDTO.class);
         Mensagem mensagem = MensagemAssember.dtoToEntityModel(mensagemDTO);
-
 
         if(anexo != null) {
             Anexo anexoValidado = anexoServiceImpl.validaAnexo(anexo);
@@ -83,9 +77,6 @@ public class MensagemController {
     @DeleteMapping("{id}")
     public void delete(@PathVariable(value = "id") Long id) {
         Mensagem mensagem = mensagemServiceImpl.findById(id);
-        Envio envio = envioServiceImpl.findByMensagem(mensagem);
-
-        envioServiceImpl.delete(envio);
         mensagemServiceImpl.delete(mensagem);
     }
 

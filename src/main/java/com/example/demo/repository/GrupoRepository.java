@@ -26,4 +26,6 @@ public interface GrupoRepository extends JpaRepository<Grupo, Long> {
     @Query(value = "select admin_id from grupo_admins where grupo_id = :grupo", nativeQuery = true)
     List<Long> findAdmsByGrupo(Grupo grupo);
 
+    Grupo findByNome(String nome);
+
 }

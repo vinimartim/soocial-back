@@ -9,21 +9,14 @@ import com.example.demo.services.impl.UsuarioServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class PostAssember {
-    @Autowired
-    private static AnexoServiceImpl anexoServiceImpl;
-
-    @Autowired
-    private static UsuarioServiceImpl usuarioServiceImpl;
-
+    /**
+     * Função que transforma um objeto DTO em um objeto
+     * @param dto o objeto dto
+     * @return post
+     */
     public static Post dtoToEntityModel(PostDTO dto) {
         Post post = new Post();
         System.out.println(dto.getUsuario().getId());
-//        Usuario usuario = usuarioServiceImpl.findById(dto.getUsuario().getId());
-//        if(usuario != null) {
-//            post.setUsuario(usuario);
-//        } else {
-//            post.setUsuario(null);
-//        }
         post.setConteudo(dto.getConteudo());
         post.setUsuario(dto.getUsuario());
         post.setEdicao(dto.isEdicao());

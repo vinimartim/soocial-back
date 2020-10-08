@@ -21,14 +21,13 @@ public class EnvioServiceImpl implements EnvioService {
     @Autowired
     private UsuarioServiceImpl usuarioServiceImpl;
 
-    public Envio save(Envio entity) {
-        if (usuarioServiceImpl.findByUsername(entity.getDestinatario().getUsername()) == null &&
-        usuarioServiceImpl.findById(entity.getRemetente().getId()) == null) {
-            throw new RegradeNegocioException("Usuário não encontrado");
-        }
-
-        return repository.save(entity);
-    }
+//    public Envio save(Envio entity) {
+//        if (usuarioServiceImpl.findByUsername(entity.getDestinatario().getUsername()) == null) {
+//            throw new RegradeNegocioException("Usuário não encontrado");
+//        }
+//
+//        return repository.save(entity);
+//    }
 
     public Envio findById(Long id) {
         return repository
@@ -53,17 +52,6 @@ public class EnvioServiceImpl implements EnvioService {
     }
 
     public Envio setarEnvio(MensagemDTO mensagemDTO) {
-//        Envio envio = new Envio();
-//        Usuario remetente = mensagemDTO.getRemetente();
-//        Usuario destinatario = usuarioService.findByUsername(mensagemDTO.getDestinatario().getUsername());
-//
-//        if(destinatario == null) {
-//            throw new RegradeNegocioException("Destinatário não encontrado");
-//        }
-//
-//        envio.setRemetente(remetente);
-//        envio.setDestinatario(destinatario);
-
         return null;
     }
 }

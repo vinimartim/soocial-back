@@ -20,7 +20,7 @@ public class Session implements Serializable {
     @Column(name = "token")
     private String token;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 }

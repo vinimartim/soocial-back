@@ -13,5 +13,4 @@ public class AuthResponse {
     private final String message;
     private final String token;
     private final Usuario usuario;
-
 }

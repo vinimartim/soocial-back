@@ -38,7 +38,7 @@ public class GrupoController {
     }
 
     @PostMapping
-    public ResponseEntity<Grupo> add(@RequestBody GrupoDTO grupoDTO) {
+    public ResponseEntity<Grupo> add(@Valid @RequestBody GrupoDTO grupoDTO) {
         Grupo grupo = GrupoAssember.dtoToEntityModel(grupoDTO);
         return new ResponseEntity<>(grupoServiceImpl.save(grupo), CREATED);
     }
